@@ -1,18 +1,24 @@
+#ifndef _WIN32
+#  define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOGDI
+#  define WIN32_LEAN_AND_MEAN
+#  define NOGDI
 // Avoid winnt.h TokenType conflict with our TokenType
-#define TokenType _win_TokenType
-#include <windows.h>
-#undef TokenType
-#include <process.h>
+#  define TokenType _win_TokenType
+#  include <windows.h>
+#  undef TokenType
+#  include <process.h>
 #else
-#include <unistd.h>
-#include <limits.h>
+#  include <unistd.h>
+#  include <limits.h>
 #endif
+
 #include "util.h"
 #include "lexer.h"
 #include "parser.h"
