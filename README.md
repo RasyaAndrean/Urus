@@ -97,11 +97,15 @@ Full architecture docs: [documentation/architecture](./documentation/architectur
 git clone https://github.com/RasyaAndrean/urus.git
 cd urus/compiler
 
-# Build (Linux / macOS)
-make
+# Build (All Platforms)
+cmake -S . -B build
+cmake --build build
 
-# Build (Windows)
-build.bat
+# Install to system (Linux / MacOS)
+sudo cmake --install build
+
+# Install to system (Windows Run As Administrator)
+cmake --install build
 ```
 
 ### Prebuilt Binary

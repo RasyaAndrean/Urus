@@ -28,12 +28,12 @@ choco install mingw
 **Linux (Ubuntu/Debian):**
 ```bash
 sudo apt update
-sudo apt install gcc make
+sudo apt install gcc cmake
 ```
 
 **Linux (Fedora/RHEL):**
 ```bash
-sudo dnf install gcc make
+sudo dnf install gcc cmake
 ```
 
 **macOS:**
@@ -42,7 +42,7 @@ sudo dnf install gcc make
 xcode-select --install
 
 # Or via Homebrew
-brew install gcc make
+brew install gcc cmake
 ```
 
 ### Verification
@@ -51,29 +51,21 @@ brew install gcc make
 gcc --version
 # gcc (GCC) 12.x.x or newer
 
-make --version
-# GNU Make 4.x
+cmake --version
+# cmake version 3.10.x or newer
 ```
 
 ## Build Compiler
 
-### Linux / macOS
+### Cmake build (All Platforms)
 
 ```bash
 cd compiler/
-make
+cmake -S . -B build
+cmake --build build
 ```
 
-Output: `compiler/urusc`
-
-### Windows
-
-```batch
-cd compiler\
-build.bat
-```
-
-Output: `compiler\urusc.exe`
+Output: `compiler/build/urusc` (or `compiler/build/urusc.exe` in windows)
 
 ### Manual Build (All Platforms)
 
@@ -96,7 +88,19 @@ export PATH="$PATH:/path/to/Urus/compiler"
 2. Environment Variables → Path → Edit
 3. Add the path to the `compiler\` folder
 
-### Verify Installation
+## Install to your system
+
+### Linux / MacOS
+```bash
+sudo cmake --install build
+```
+
+### Windows (Run As Administrator)
+```
+cmake --install build
+```
+
+## Verify Installation
 
 ```bash
 urusc --help
@@ -105,11 +109,7 @@ urusc --help
 Output:
 ```
 URUS Compiler v1.0.0
-Usage: urusc [options] <file.urus>
-Options:
-  --emit-c     Output generated C code to stdout
-  -o <file>    Set output binary name
-  --help       Show this help
+...
 ```
 
 ## Getting Started
