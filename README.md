@@ -287,12 +287,18 @@ fn main(): void {
 ## CLI Usage
 
 ```
-urusc <file.urus> [options]
+usage: urusc <file.urus> [options]
+
+Rust-like safety with Python-like simplicity, transpiling to C11
 
 Options:
-  --emit-c     Output generated C code to stdout
-  -o <file>    Set output binary name
-  --help       Show help
+  --tokens    Display Lexer tokens
+  --ast       Display the Abstract Syntax Tree (AST)
+  --emit-c    Print generated C code to stdout
+  -o <file>   Specify output executable name (default to: a.exe)
+
+Example:
+  `urusc main.urus -o app`
 ```
 
 ## Running Tests
