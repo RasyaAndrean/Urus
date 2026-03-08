@@ -214,10 +214,24 @@ static void print_tokens(Token *tokens, int count) {
     printf("\n");
 }
 
+void show_help(void) {
+    static const char *help =
+        "usage: urusc <file.urus> [options]\n\n"
+        "Rust-like safety with Python-like simplicity, transpiling to C11\n\n"
+        "Options:\n"
+        "  --tokens    Display Lexer tokens\n"
+        "  --ast       Display the Abstract Syntax Tree (AST)\n"
+        "  --emit-c    Print generated C code to stdout\n"
+        "  -o <file>   Specify output executable name (default to: a.exe)\n\n"
+        "Example:\n"
+        "  `urusc main.urus -o app` \n";
+
+    printf("%s", help);
+}
+
 int main(int argc, char **argv) {
     if (argc < 2) {
-        fprintf(stderr, "URUS Compiler v1.0.0\n");
-        fprintf(stderr, "Usage: urusc <file.urus> [--tokens] [--ast] [--emit-c] [-o output]\n");
+        show_help();
         return 1;
     }
 
