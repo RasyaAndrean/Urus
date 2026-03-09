@@ -26,30 +26,6 @@
 #include "codegen.h"
 #include "sema.h"
 
-// ---- Get compiler directory ----
-
-// Returns the directory containing the compiler executable (caller must free)
-static char *get_compiler_dir(void) {
-    char buf[4096];
-#ifdef _WIN32
-    DWORD len = GetModuleFileNameA(NULL, buf, sizeof(buf));
-    if (len == 0 || len >= sizeof(buf)) return NULL;
-#else
-    ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
-    if (len < 0) return NULL;
-    buf[len] = '\0';
-#endif
-    // Find last separator
-    char *last_sep = NULL;
-    for (char *p = buf; *p; p++) {
-        if (*p == '/' || *p == '\\') last_sep = p;
-    }
-    if (last_sep) {
-        last_sep[1] = '\0';
-    }
-    return strdup(buf);
-}
-
 // Find gcc executable, trying common paths on Windows
 static const char *find_gcc(void) {
 #ifdef _WIN32
