@@ -7,6 +7,7 @@
 
 typedef struct {
     Token *tokens;
+    const char *filename;
     int count;
     int pos;
     bool had_error;
