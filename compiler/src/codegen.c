@@ -37,13 +37,12 @@ static void emit(CodeBuf *buf, const char *fmt, ...) {
     va_copy(args_copy, args);
     int n = vsnprintf(NULL, 0, fmt, args_copy);
     va_end(args_copy);
-    if (n <= 0) {
-        va_end(args);
-        return;
+    if (n > 0) { 
+        buf_ensure(buf, n);
+        vsnprintf(buf->data + buf->len, (size_t)n + 1, fmt, args);
+        buf->len += (size_t)n;
+        buf->data[buf->len] = '\0';
     }
-    buf_ensure(buf, n);
-    vsnprintf(buf->data + buf->len, (size_t)n + 1, fmt, args);
-    buf->len += (size_t)n;
     va_end(args);
 }
 
