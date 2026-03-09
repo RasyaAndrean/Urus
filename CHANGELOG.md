@@ -1,5 +1,39 @@
 # Changelog
 
+## v1.0.1(F) "Fixed" (2026-03-09)
+
+### Build System
+- Migrated from Makefile/build.bat to **CMake** for cross-platform portability
+- Added `cmake/embed-string.cmake` to embed runtime header into the compiler binary
+
+### Bug Fixes
+- Fixed missing `stddef.h` include in `urus_runtime.h` (Linux compatibility)
+- Fixed implicit declaration of POSIX functions in C11 mode
+- Fixed unterminated string in `emit()` codegen function
+- Compiler is now **standalone** — `urus_runtime.h` is embedded into the binary, no external runtime file needed
+- Fixed `error.c` using POSIX `getline()` — replaced with portable `fgets()` for MSVC/Windows compatibility
+- Fixed `_urus_tmp.c` double CRLF corruption on Windows — temp file now written in binary mode
+- Fixed `--help`/`--version` flags not recognized (was treated as filename)
+- Fixed GCC `cc1` not found on Windows — compiler now injects GCC bin directory into PATH
+- Removed obsolete `-I include` flag from GCC invocation (runtime is now embedded)
+- Added MSVC compatibility defines (`_CRT_SECURE_NO_WARNINGS`, `_CRT_NONSTDC_NO_DEPRECATE`)
+
+### Improvements
+- Added `show_help()` CLI usage with `--help` and `-h` flags
+- Added `--version` / `-v` flag to display compiler version
+- Rich **error diagnostics**: colored output with filename, line number, column caret (^) pointer
+- Error reporting integrated into both **parser** and **semantic analysis**
+- Added `install` and `uninstall` targets via CMake
+- Updated installation documentation for CMake workflow
+- Added parser error test case (`tests/invalid/parser/unclosed_brace.urus`)
+- Dockerfile updated to use CMake build and org URL updated
+
+### Contributors
+- **John-fried** — Linux fixes, CMake migration, standalone compiler, error logging (PR #2-#7)
+- **RasyaAndrean** — Project maintenance, PR reviews
+
+---
+
 ## v1.0.0 (2026-03-02)
 
 ### New Features

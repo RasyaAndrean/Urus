@@ -13,12 +13,8 @@ Thank you for your interest in contributing to URUS! This guide will help you ge
 3. **Build** the compiler:
    ```bash
    cd compiler
-
-   # Linux / macOS
-   make
-
-   # Windows
-   build.bat
+   cmake -S . -B build
+   cmake --build build
    ```
 4. **Run tests** to make sure everything works:
    ```bash
@@ -30,7 +26,7 @@ Thank you for your interest in contributing to URUS! This guide will help you ge
 
 ### Reporting Bugs
 
-- Search [existing issues](https://github.com/RasyaAndrean/urus/issues) first to avoid duplicates
+- Search [existing issues](https://github.com/Urus-Foundation/Urus/issues) first to avoid duplicates
 - Open a new issue with:
   - URUS version (`urusc --help` shows version)
   - OS and GCC version

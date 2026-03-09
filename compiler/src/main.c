@@ -217,6 +217,7 @@ static void print_tokens(Token *tokens, int count) {
 
 void show_help(void) {
     static const char *help =
+        "URUS Compiler v1.0.1(F)\n\n"
         "usage: urusc <file.urus> [options]\n\n"
         "Rust-like safety with Python-like simplicity, transpiling to C11\n\n"
         "Options:\n"
@@ -234,6 +235,18 @@ int main(int argc, char **argv) {
     if (argc < 2) {
         show_help();
         return 1;
+    }
+
+    /* Handle --help and --version before assuming argv[1] is a file */
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+            show_help();
+            return 0;
+        }
+        if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
+            printf("URUS Compiler v1.0.1(F)\n");
+            return 0;
+        }
     }
 
     const char *path = argv[1];
@@ -318,7 +331,7 @@ int main(int argc, char **argv) {
         const char *c_path = "_urus_tmp.c";
         const char *out_path = output ? output : "a.exe";
 
-        FILE *f = fopen(c_path, "w");
+        FILE *f = fopen(c_path, "wb");
         if (!f) {
             fprintf(stderr, "Error: cannot create temp file '%s'\n", c_path);
             codegen_free(&cbuf);
@@ -329,20 +342,6 @@ int main(int argc, char **argv) {
         }
         fwrite(cbuf.data, 1, cbuf.len, f);
         fclose(f);
-
-        // Find the include directory (next to compiler executable)
-        char *compiler_dir = get_compiler_dir();
-        char include_dir[4096];
-        if (compiler_dir) {
-            snprintf(include_dir, sizeof(include_dir), "%sinclude", compiler_dir);
-            free(compiler_dir);
-        } else {
-            snprintf(include_dir, sizeof(include_dir), ".");
-        }
-        // Normalize backslashes to forward slashes for GCC compatibility
-        for (char *p = include_dir; *p; p++) {
-            if (*p == '\\') *p = '/';
-        }
 
         const char *gcc_path = find_gcc();
 
@@ -356,23 +355,39 @@ int main(int argc, char **argv) {
             _putenv_s("TEMP", win_tmp);
         }
 
+        // Ensure GCC's bin directory is in PATH so cc1 can be found
+        {
+            const char *last_slash = strrchr(gcc_path, '/');
+            if (!last_slash) last_slash = strrchr(gcc_path, '\\');
+            if (last_slash) {
+                size_t dir_len = (size_t)(last_slash - gcc_path);
+                char gcc_dir[4096];
+                snprintf(gcc_dir, sizeof(gcc_dir), "%.*s", (int)dir_len, gcc_path);
+                const char *old_path = getenv("PATH");
+                char new_path[16384];
+                snprintf(new_path, sizeof(new_path), "%s;%s", gcc_dir, old_path ? old_path : "");
+                _putenv_s("PATH", new_path);
+            }
+        }
+
+        // Runtime header is embedded in generated C, no -I needed
         char cmd[8192];
         snprintf(cmd, sizeof(cmd),
-                 "%s -std=c11 -O2 -I \"%s\" -o \"%s\" \"%s\" -lm",
-                 gcc_path, include_dir, out_path, c_path);
+                 "\"%s\" -std=c11 -O2 -o \"%s\" \"%s\" -lm",
+                 gcc_path, out_path, c_path);
         printf("Compiling: %s\n", cmd);
 
-        // Use _spawnl to avoid cmd.exe quoting issues
+        // Use _spawnl for reliable execution on Windows
         int ret = (int)_spawnl(_P_WAIT, gcc_path, "gcc",
                                "-std=c11", "-O2",
-                               "-I", include_dir,
                                "-o", out_path,
                                c_path, "-lm", NULL);
 #else
+        // Runtime header is embedded in generated C, no -I needed
         char cmd[8192];
         snprintf(cmd, sizeof(cmd),
-                 "%s -std=c11 -O2 -I \"%s\" -o \"%s\" \"%s\" -lm",
-                 gcc_path, include_dir, out_path, c_path);
+                 "%s -std=c11 -O2 -o \"%s\" \"%s\" -lm",
+                 gcc_path, out_path, c_path);
         printf("Compiling: %s\n", cmd);
         int ret = system(cmd);
 #endif
