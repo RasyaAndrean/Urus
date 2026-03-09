@@ -11,6 +11,19 @@ else()
     add_compile_options(-Wall -Wextra -g)
 endif()
 
+set(URUS_RUNTIME_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/urus_runtime.h")
+set(URUS_RUNTIME_EMBEDDED "${CMAKE_CURRENT_BINARY_DIR}/urus_runtime.c")
+
+add_custom_command(
+    OUTPUT "${URUS_RUNTIME_EMBEDDED}"
+    COMMAND ${CMAKE_COMMAND}
+            -DINPUT_FILE=${URUS_RUNTIME_HEADER}
+            -DOUTPUT_FILE=${URUS_RUNTIME_EMBEDDED}
+            -DVARIABLE_NAME=urus_runtime_header_data
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed-string.cmake"
+    DEPENDS "${URUS_RUNTIME_H}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed-string.cmake"
+)
+
 # source
 set(SOURCES
     src/main.c
@@ -22,7 +35,7 @@ set(SOURCES
     src/codegen.c
 )
 
-add_executable(urusc ${SOURCES})
+add_executable(urusc ${SOURCES} ${URUS_RUNTIME_EMBEDDED})
 target_include_directories(urusc PRIVATE include) # -Iinclude
 
 # -lm for non-windows
