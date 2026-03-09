@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
     }
 
     // Semantic analysis
-    if (!sema_analyze(program)) {
+    if (!sema_analyze(program, path)) {
         fprintf(stderr, "Semantic analysis failed.\n");
         ast_free(program);
         free(tokens);

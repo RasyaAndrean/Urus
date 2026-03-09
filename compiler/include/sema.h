@@ -5,6 +5,6 @@
 #include <stdbool.h>
 
 // Returns true if analysis succeeded (no errors)
-bool sema_analyze(AstNode *program);
+bool sema_analyze(AstNode *program, const char *filename);
 
 #endif
