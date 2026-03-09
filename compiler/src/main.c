@@ -143,6 +143,7 @@ static bool process_imports(AstNode *program, const char *base_file) {
         }
 
         Parser parser;
+        parser.filename = path;
         parser_init(&parser, tokens, token_count);
         AstNode *imported = parser_parse(&parser);
 
@@ -271,6 +272,7 @@ int main(int argc, char **argv) {
 
     // Parsing
     Parser parser;
+    parser.filename = path;
     parser_init(&parser, tokens, token_count);
     AstNode *program = parser_parse(&parser);
 

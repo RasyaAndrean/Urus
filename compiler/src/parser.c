@@ -3,6 +3,7 @@
 #endif
 
 #include "parser.h"
+#include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,8 +42,7 @@ static Token advance_tok(Parser *p) {
 static void error_at(Parser *p, Token t, const char *msg) {
     if (p->had_error) return;
     p->had_error = true;
-    fprintf(stderr, "[line %d] Error at '%.*s': %s\n",
-            t.line, (int)t.length, t.start, msg);
+    report_error(p->filename, &t, msg);
 }
 
 static Token expect(Parser *p, TokenType type, const char *msg) {

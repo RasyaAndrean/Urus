@@ -87,6 +87,7 @@ typedef struct {
     const char *start;
     size_t length;
     int line;
+    int col;
 } Token;
 
 const char *token_type_name(TokenType type);
