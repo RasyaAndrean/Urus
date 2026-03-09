@@ -23,7 +23,10 @@ static char peek_next(Lexer *l) {
 
 static char advance(Lexer *l) {
     char c = l->source[l->pos++];
-    if (c == '\n') l->line++;
+    if (c == '\n') {
+        l->line++;
+        l->line_start = l->pos;
+    }
     return c;
 }
 
@@ -50,7 +53,7 @@ static void skip_whitespace(Lexer *l) {
 }
 
 static Token make_token(Lexer *l, TokenType type, const char *start, size_t len) {
-    return (Token){ .type = type, .start = start, .length = len, .line = l->line };
+    return (Token){ .type = type, .start = start, .length = len, .line = l->line, .col = (int)(start - (l->source + l->line_start)) + 1 };
 }
 
 static Token error_token(Lexer *l, const char *msg) {

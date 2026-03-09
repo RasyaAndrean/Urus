@@ -7,10 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-AstNode *ast_new(NodeKind kind, int line) {
+AstNode *ast_new(NodeKind kind, Token tok) {
     AstNode *n = calloc(1, sizeof(AstNode));
     n->kind = kind;
-    n->line = line;
+    n->tok = tok;
     return n;
 }
 
