@@ -108,7 +108,7 @@ typedef struct {
 // ---- AST Node ----
 struct AstNode {
     NodeKind kind;
-    int line;
+    Token tok;
 
     union {
         // NODE_PROGRAM
@@ -258,7 +258,7 @@ struct AstNode {
 };
 
 // Constructors
-AstNode *ast_new(NodeKind kind, int line);
+AstNode *ast_new(NodeKind kind, Token tok);
 AstType *ast_type_simple(TypeKind kind);
 AstType *ast_type_array(AstType *element);
 AstType *ast_type_named(const char *name);

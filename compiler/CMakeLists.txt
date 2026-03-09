@@ -31,6 +31,7 @@ set(SOURCES
     src/ast.c
     src/parser.c
     src/util.c
+    src/error.c
     src/sema.c
     src/codegen.c
 )
