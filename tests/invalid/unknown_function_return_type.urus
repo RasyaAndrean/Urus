@@ -1,0 +1,3 @@
+fn main(): voif { // <- void -> voif typo
+    let mut x: int = 15;
+}

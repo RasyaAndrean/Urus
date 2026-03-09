@@ -809,6 +809,12 @@ bool sema_analyze(AstNode *program, const char *filename) {
                 sema_error(&ctx, &d->tok, "duplicate function '%s'", d->as.fn_decl.name);
                 continue;
             }
+            else if (d->as.fn_decl.return_type->kind == TYPE_NAMED &&
+                    !scope_lookup(ctx.current, d->as.fn_decl.return_type->name)) {
+                sema_error(&ctx, &d->tok, "function '%s' has unknown return type '%s'", d->as.fn_decl.name,
+                           d->as.fn_decl.return_type->name);
+                continue;
+            }
             Symbol *s = scope_add(global, d->as.fn_decl.name);
             s->is_fn = true;
             s->params = d->as.fn_decl.params;
