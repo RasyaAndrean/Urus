@@ -5,7 +5,7 @@
 | Requirement | Version | Notes |
 |-------------|---------|-------|
 | GCC | 8.0+ | C compiler (to build urusc and compile output) |
-| Make | 3.80+ | Build system (Linux/macOS, optional on Windows) |
+| CMake | 3.10+ | Build system (cross-platform) |
 | OS | Windows 10+, Linux, macOS | Any platform with GCC |
 
 ### Install GCC
@@ -108,7 +108,7 @@ urusc --help
 
 Output:
 ```
-URUS Compiler v1.0.0
+URUS Compiler v1.0.1(F)
 ...
 ```
 

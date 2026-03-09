@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(UrusCompiler VERSION 1.0.0 LANGUAGES C)
+project(UrusCompiler VERSION 1.0.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11) # -std=c11
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 if(MSVC)
     add_compile_options(/W4)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
 else()
     add_compile_options(-Wall -Wextra -g)
 endif()

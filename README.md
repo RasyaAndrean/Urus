@@ -1,27 +1,35 @@
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![License](https://img.shields.io/badge/license-Apache%202.0-green)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
-![C Standard](https://img.shields.io/badge/C-C11-orange)
-![Status](https://img.shields.io/badge/status-stable-brightgreen)
+<p align="center">
+  <h1 align="center">URUS Programming Language</h1>
+  <p align="center">
+    <strong>A statically-typed, compiled programming language that transpiles to portable C11.</strong>
+  </p>
+  <p align="center">Safe. Simple. Fast.</p>
+</p>
 
-<div align="center">
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.0.1(F)-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build" />
+  <img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="License" />
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey" alt="Platform" />
+  <img src="https://img.shields.io/badge/C-C11-orange" alt="C Standard" />
+  <img src="https://img.shields.io/badge/status-stable-brightgreen" alt="Status" />
+</p>
 
-# URUS Programming Language
-
-**A statically-typed, compiled programming language that transpiles to portable C11.**
-
-Safe. Simple. Fast.
-
-[Quick Start](#quick-start) | [Documentation](./documentation/) | [Examples](./examples/) | [Roadmap](#roadmap)
-
-</div>
+<p align="center">
+  <a href="#quick-start">Quick Start</a> &nbsp;&bull;&nbsp;
+  <a href="#features">Features</a> &nbsp;&bull;&nbsp;
+  <a href="./documentation/">Documentation</a> &nbsp;&bull;&nbsp;
+  <a href="./examples/">Examples</a> &nbsp;&bull;&nbsp;
+  <a href="#roadmap">Roadmap</a>
+</p>
 
 ---
 
 ## Language Status
 
-URUS v1.0.0 is **stable**. The core language syntax and features are finalized. Breaking changes will only occur in major version bumps following [Semantic Versioning](https://semver.org/).
+URUS **v1.0.1(F) "Fixed"** is stable. The core language syntax and features are finalized. Breaking changes will only occur in major version bumps following [Semantic Versioning](https://semver.org/).
+
+---
 
 ## Why URUS?
 
@@ -33,84 +41,38 @@ URUS v1.0.0 is **stable**. The core language syntax and features are finalized. 
 | **More portable than Go** | Transpiles to standard C11 — runs anywhere GCC runs |
 | **Modern syntax** | Enums, pattern matching, string interpolation, Result type |
 
-```urus
-fn main(): void {
-    let name: str = "World";
-    print(f"Hello, {name}!");
-
-    let nums: [int] = [1, 2, 3, 4, 5];
-    let mut sum: int = 0;
-    for i in 0..len(nums) {
-        sum += nums[i];
-    }
-    print(f"Sum: {sum}");
-}
-```
-
-## Project Stats
-
-| Metric | Value |
-|--------|-------|
-| Current Version | 1.0.0 |
-| Compiler Size | ~464 KB |
-| Runtime Size | ~16 KB (header-only) |
-| Compiler LOC | ~4,200 |
-| Runtime LOC | ~430 |
-| Generated Output | C11 compliant |
-| Supported Platforms | Windows, Linux, macOS |
-| Dependencies | GCC only |
-
-## Architecture
-
-```
-Source (.urus)
-     |
-     v
-  [ Lexer ]       tokenize source code
-     |
-     v
-  [ Parser ]      build Abstract Syntax Tree
-     |
-     v
-  [ Sema ]        type checking & semantic analysis
-     |
-     v
-  [ Codegen ]     generate standard C11 code
-     |
-     v
-  [ GCC ]         compile to native binary
-     |
-     v
-  Executable
-```
-
-Full architecture docs: [documentation/architecture](./documentation/architecture/)
+---
 
 ## Quick Start
 
-### Install
+### Requirements
 
-**Requirements:** GCC 8+ (MinGW-w64 / MSYS2 on Windows)
+- **GCC** 8+ (MinGW-w64 / MSYS2 on Windows)
+- **CMake** 3.10+
+
+### Build from Source
 
 ```bash
-# Clone
-git clone https://github.com/RasyaAndrean/urus.git
-cd urus/compiler
+git clone https://github.com/Urus-Foundation/Urus.git
+cd Urus/compiler
 
-# Build (All Platforms)
 cmake -S . -B build
 cmake --build build
+```
 
-# Install to system (Linux / MacOS)
+Install to system:
+
+```bash
+# Linux / macOS
 sudo cmake --install build
 
-# Install to system (Windows Run As Administrator)
+# Windows (Run As Administrator)
 cmake --install build
 ```
 
 ### Prebuilt Binary
 
-> Coming soon — check [Releases](https://github.com/RasyaAndrean/urus/releases) page.
+> Coming soon — check [Releases](https://github.com/Urus-Foundation/Urus/releases) page.
 
 ### Hello World
 
@@ -123,22 +85,24 @@ fn main(): void {
 ```bash
 urusc hello.urus -o hello
 ./hello
-# Output: Hello, World!
+# Hello, World!
 ```
+
+---
 
 ## Features
 
-### Types
+### Primitive Types
 
-| Type | Description |
-|------|-------------|
-| `int` | 64-bit signed integer |
-| `float` | 64-bit floating point |
-| `bool` | Boolean (`true` / `false`) |
-| `str` | UTF-8 string (ref-counted) |
-| `void` | No value |
-| `[T]` | Dynamic array of T |
-| `Result<T, E>` | Ok or Err value |
+| Type | Description | C Equivalent |
+|------|-------------|--------------|
+| `int` | 64-bit signed integer | `int64_t` |
+| `float` | 64-bit floating point | `double` |
+| `bool` | Boolean (`true` / `false`) | `bool` |
+| `str` | UTF-8 string (ref-counted) | `urus_str*` |
+| `void` | No value | `void` |
+| `[T]` | Dynamic array of T | `urus_array*` |
+| `Result<T, E>` | Ok or Err value | `urus_result` |
 
 ### Variables
 
@@ -163,22 +127,31 @@ fn greet(name: str) {
 ### Control Flow
 
 ```urus
+// If / Else
 if x > 10 {
     print("big");
 } else {
     print("small");
 }
 
+// While
 while x < 100 {
     x += 1;
 }
 
-for i in 0..10 {       // exclusive: 0-9
+// For (range)
+for i in 0..10 {       // exclusive: 0 to 9
     print(f"{i}");
 }
 
-for i in 0..=10 {      // inclusive: 0-10
+for i in 0..=10 {      // inclusive: 0 to 10
     print(f"{i}");
+}
+
+// For-each (array)
+let names: [str] = ["Alice", "Bob"];
+for name in names {
+    print(name);
 }
 ```
 
@@ -241,7 +214,7 @@ let count: int = 42;
 print(f"Hello {name}! Answer: {count}");
 ```
 
-### Modules
+### Modules / Imports
 
 ```urus
 // math_utils.urus
@@ -257,7 +230,7 @@ fn main(): void {
 }
 ```
 
-### Error Handling
+### Error Handling (Result Type)
 
 ```urus
 fn divide(a: int, b: int): Result<int, str> {
@@ -277,33 +250,143 @@ fn main(): void {
 }
 ```
 
-### Built-in Functions
+---
 
-| Category | Functions |
-|----------|-----------|
-| **I/O** | `print`, `read_file`, `write_file`, `append_file` |
-| **Array** | `len`, `push` |
-| **String** | `str_len`, `str_upper`, `str_lower`, `str_trim`, `str_contains`, `str_slice`, `str_replace` |
-| **Conversion** | `to_str`, `to_int`, `to_float` |
-| **Math** | `sqrt`, `abs` |
-| **Result** | `is_ok`, `is_err`, `unwrap`, `unwrap_err` |
+## Built-in Functions
+
+### I/O
+
+| Function | Description |
+|----------|-------------|
+| `print(value)` | Print to stdout with newline |
+| `input()` | Read one line from stdin |
+| `read_file(path)` | Read file contents as string |
+| `write_file(path, s)` | Write string to file |
+| `append_file(path, s)` | Append string to file |
+
+### Array
+
+| Function | Description |
+|----------|-------------|
+| `len(array)` | Array length |
+| `push(array, v)` | Append to array |
+| `pop(array)` | Remove last element |
+
+### String
+
+| Function | Description |
+|----------|-------------|
+| `str_len(s)` | String length |
+| `str_upper(s)` | Uppercase |
+| `str_lower(s)` | Lowercase |
+| `str_trim(s)` | Trim whitespace |
+| `str_contains(s, sub)` | Check if contains substring |
+| `str_find(s, sub)` | Find index of substring |
+| `str_slice(s, a, b)` | Substring from a to b |
+| `str_replace(s, a, b)` | Replace occurrences |
+| `str_starts_with(s, p)` | Check prefix |
+| `str_ends_with(s, p)` | Check suffix |
+| `str_split(s, delim)` | Split into array |
+| `char_at(s, i)` | Character at index |
+
+### Conversion
+
+| Function | Description |
+|----------|-------------|
+| `to_str(value)` | Convert to string |
+| `to_int(value)` | Convert to int |
+| `to_float(value)` | Convert to float |
+
+### Math
+
+| Function | Description |
+|----------|-------------|
+| `abs(x)` / `fabs(x)` | Absolute value |
+| `sqrt(x)` | Square root |
+| `pow(x, y)` | Power |
+| `min(a, b)` / `max(a, b)` | Min/max (int) |
+| `fmin(a, b)` / `fmax(a, b)` | Min/max (float) |
+
+### Result
+
+| Function | Description |
+|----------|-------------|
+| `is_ok(result)` | Check if Ok |
+| `is_err(result)` | Check if Err |
+| `unwrap(result)` | Extract Ok value (aborts on Err) |
+| `unwrap_err(result)` | Extract Err value (aborts on Ok) |
+
+### Misc
+
+| Function | Description |
+|----------|-------------|
+| `exit(code)` | Exit program |
+| `assert(cond, msg)` | Abort if false |
+
+---
 
 ## CLI Usage
 
 ```
+URUS Compiler v1.0.1(F)
+
 usage: urusc <file.urus> [options]
 
-Rust-like safety with Python-like simplicity, transpiling to C11
-
 Options:
-  --tokens    Display Lexer tokens
-  --ast       Display the Abstract Syntax Tree (AST)
+  --help      Show help message
+  --version   Show compiler version
+  --tokens    Display lexer tokens
+  --ast       Display the AST
   --emit-c    Print generated C code to stdout
-  -o <file>   Specify output executable name (default to: a.exe)
+  -o <file>   Output executable name (default: a.exe)
 
 Example:
-  `urusc main.urus -o app`
+  urusc main.urus -o app
 ```
+
+---
+
+## Architecture
+
+```
+Source (.urus)
+     |
+     v
+  [ Lexer ]       Tokenize source code
+     |
+     v
+  [ Parser ]      Build Abstract Syntax Tree
+     |
+     v
+  [ Sema ]        Type checking & semantic analysis
+     |
+     v
+  [ Codegen ]     Generate standard C11 code
+     |
+     v
+  [ GCC ]         Compile to native binary
+     |
+     v
+  Executable
+```
+
+---
+
+## Project Stats
+
+| Metric | Value |
+|--------|-------|
+| Version | 1.0.1(F) "Fixed" |
+| Compiler Size | ~464 KB (standalone, runtime embedded) |
+| Runtime | ~16 KB header-only (embedded in binary) |
+| Compiler LOC | ~4,700+ |
+| Runtime LOC | ~467 |
+| Output | C11 compliant |
+| Platforms | Windows, Linux, macOS |
+| Build System | CMake 3.10+ |
+| Dependencies | GCC 8+ only |
+
+---
 
 ## Running Tests
 
@@ -311,77 +394,137 @@ Example:
 cd tests/
 
 # Linux / macOS
-bash run_tests.sh ../compiler/urusc
+bash run_tests.sh ../compiler/build/urusc
 
 # Windows
-run_tests.bat ..\compiler\urusc.exe
+run_tests.bat ..\compiler\build\Release\urusc.exe
 ```
+
+---
 
 ## Repository Structure
 
 ```
-.
-├── compiler/
-│   ├── src/             # Compiler source (.c)
-│   ├── include/         # Headers (.h) + runtime
-│   ├── Makefile         # Linux/macOS build
-│   └── build.bat        # Windows build
-├── examples/            # Sample URUS programs
-│   ├── hello.urus
-│   ├── fibonacci.urus
-│   ├── structs.urus
-│   ├── arrays.urus
-│   ├── enums.urus
-│   ├── strings.urus
-│   ├── result.urus
-│   ├── files.urus
-│   └── modules/         # Multi-file import example
-├── tests/
-│   ├── valid/           # Should compile
-│   ├── invalid/         # Should be rejected
-│   ├── run/             # Compile + run + check output
-│   ├── run_tests.sh     # Test runner (Linux/macOS)
-│   └── run_tests.bat    # Test runner (Windows)
-├── documentation/       # Full project documentation
-│   ├── overview/
-│   ├── architecture/
-│   ├── installation/
-│   ├── usage/
-│   ├── configuration/
-│   ├── api-reference/
-│   ├── development-guide/
-│   ├── security/
-│   ├── roadmap/
-│   ├── changelog/
-│   ├── diagrams/
-│   └── decisions/       # Architectural Decision Records
-├── SPEC.md              # Language specification
-├── CHANGELOG.md         # Version history
-├── CODE_OF_CONDUCT.md   # Community guidelines
-├── CONTRIBUTING.md      # Contribution guide
-├── SECURITY.md          # Security policy
-└── LICENSE              # Apache 2.0
+Urus/
+|
+|-- compiler/                   # Compiler source code
+|   |-- src/                    # Implementation (.c)
+|   |   |-- main.c             # CLI entry point & import resolver
+|   |   |-- lexer.c            # Tokenizer
+|   |   |-- parser.c           # Recursive descent parser
+|   |   |-- sema.c             # Semantic analysis & type checking
+|   |   |-- codegen.c          # C11 code generator
+|   |   |-- ast.c              # AST node constructors
+|   |   |-- error.c            # Error reporting with source context
+|   |   '-- util.c             # File reading utilities
+|   |
+|   |-- include/               # Headers (.h)
+|   |   |-- ast.h              # AST node definitions
+|   |   |-- token.h            # Token types & definitions
+|   |   |-- lexer.h            # Lexer interface
+|   |   |-- parser.h           # Parser interface
+|   |   |-- sema.h             # Semantic analysis interface
+|   |   |-- codegen.h          # Code generator interface
+|   |   |-- error.h            # Error reporting interface
+|   |   |-- util.h             # Utility functions
+|   |   '-- urus_runtime.h     # Runtime library (embedded in binary)
+|   |
+|   |-- cmake/
+|   |   '-- embed-string.cmake # Embeds runtime header into binary
+|   |
+|   '-- CMakeLists.txt         # Build configuration
+|
+|-- examples/                   # Sample programs
+|   |-- hello.urus             # Hello world
+|   |-- fibonacci.urus         # Fibonacci sequence
+|   |-- structs.urus           # Struct usage
+|   |-- arrays.urus            # Array operations
+|   |-- enums.urus             # Enums & pattern matching
+|   |-- strings.urus           # String operations
+|   |-- result.urus            # Error handling with Result
+|   |-- files.urus             # File I/O
+|   '-- modules/               # Multi-file import example
+|       |-- main.urus
+|       '-- math_utils.urus
+|
+|-- tests/
+|   |-- valid/                  # Programs that should compile
+|   |   |-- hello.urus
+|   |   '-- stdlib_test.urus
+|   |
+|   |-- invalid/               # Programs that should be rejected
+|   |   |-- bad_return.urus
+|   |   |-- break_outside_loop.urus
+|   |   |-- duplicate_var.urus
+|   |   |-- immutable.urus
+|   |   |-- type_mismatch.urus
+|   |   |-- undefined_var.urus
+|   |   |-- wrong_arg_count.urus
+|   |   '-- parser/
+|   |       '-- unclosed_brace.urus
+|   |
+|   |-- run/                    # Compile + run + check output
+|   |   |-- hello.urus          + hello.expected
+|   |   |-- arithmetic.urus     + arithmetic.expected
+|   |   |-- arrays.urus         + arrays.expected
+|   |   |-- foreach.urus        + foreach.expected
+|   |   |-- functions.urus      + functions.expected
+|   |   |-- if_else.urus        + if_else.expected
+|   |   |-- loops.urus          + loops.expected
+|   |   |-- strings.urus        + strings.expected
+|   |   |-- structs.urus        + structs.expected
+|   |   '-- variables.urus      + variables.expected
+|   |
+|   |-- run_tests.sh            # Test runner (Linux/macOS)
+|   '-- run_tests.bat           # Test runner (Windows)
+|
+|-- documentation/              # Full project documentation
+|   |-- overview/
+|   |-- architecture/
+|   |-- installation/
+|   |-- usage/
+|   |-- configuration/
+|   |-- api-reference/
+|   |-- development-guide/
+|   |-- security/
+|   |-- roadmap/
+|   |-- changelog/
+|   |-- diagrams/
+|   '-- decisions/              # Architectural Decision Records
+|
+|-- SPEC.md                     # Language specification & grammar
+|-- CHANGELOG.md                # Version history
+|-- CATATANRASYA.md             # Development notes (v1.0.1)
+|-- CODE_OF_CONDUCT.md          # Community guidelines
+|-- CONTRIBUTING.md             # Contribution guide
+|-- SECURITY.md                 # Security policy
+|-- Dockerfile                  # Container build
+'-- LICENSE                     # Apache 2.0
 ```
+
+---
 
 ## Comparison
 
 | Feature | URUS | C | Rust | Go | Python |
-|---------|------|---|------|----|--------|
+|---------|:----:|:-:|:----:|:--:|:------:|
 | Static typing | Yes | Yes | Yes | Yes | No |
-| Memory safety | RC + bounds check | Manual | Ownership | GC | GC |
+| Memory safety | RC + bounds | Manual | Ownership | GC | GC |
 | Pattern matching | Yes | No | Yes | No | Limited |
 | String interpolation | Yes | No | No | No | Yes |
 | Result type | Yes | No | Yes | No | No |
-| Null safety | Yes (no null) | No | Yes | No | No |
-| Compiles to native | Yes (via C) | Yes | Yes | Yes | No |
+| Null safety | Yes | No | Yes | No | No |
+| Compiles to native | Yes | Yes | Yes | Yes | No |
 | Learning curve | Low | Medium | High | Low | Low |
-| Zero dependencies | Yes | Yes | No (LLVM) | No | No |
+| Zero dependencies | Yes | Yes | No | No | No |
+
+---
 
 ## Roadmap
 
 ### v1.1.0 — Quality of Life
 - Default parameter values
-- Better error messages with source context
+- ~~Better error messages with source context~~ *(Done in v1.0.1)*
 - Warning system (unused variables, etc.)
 
 ### v1.2.0 — Type System
@@ -406,20 +549,7 @@ run_tests.bat ..\compiler\urusc.exe
 
 Full roadmap: [documentation/roadmap](./documentation/roadmap/)
 
-## Contributing
-
-Pull requests are welcome.
-
-```
-1. Fork the repo
-2. Create a feature branch
-3. Follow coding style (see documentation/development-guide)
-4. Add tests
-5. Update documentation
-6. Submit PR
-```
-
-See [Development Guide](./documentation/development-guide/) for coding standards, branch strategy, and testing guidelines.
+---
 
 ## Inspiration
 
@@ -430,16 +560,34 @@ URUS draws inspiration from:
 - **Zig** — transpile-to-C philosophy, minimal runtime
 - **Python** — f-string interpolation, readability
 
-## License
+---
 
-Apache License 2.0 — see [LICENSE](LICENSE)
+## Contributing
+
+```
+1. Fork the repo
+2. Create a feature branch
+3. Follow coding style (see documentation/development-guide)
+4. Add tests
+5. Update documentation
+6. Submit PR
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ---
 
-<div align="center">
+## License
 
-**Built with care. Designed for clarity.**
+Apache License 2.0 — see [LICENSE](./LICENSE)
 
-[Documentation](./documentation/) | [Examples](./examples/) | [Specification](./SPEC.md) | [Changelog](./CHANGELOG.md)
+---
 
-</div>
+<p align="center">
+  <strong>Built with care. Designed for clarity.</strong>
+  <br><br>
+  <a href="./documentation/">Documentation</a> &nbsp;&bull;&nbsp;
+  <a href="./examples/">Examples</a> &nbsp;&bull;&nbsp;
+  <a href="./SPEC.md">Specification</a> &nbsp;&bull;&nbsp;
+  <a href="./CHANGELOG.md">Changelog</a>
+</p>
