@@ -16,8 +16,11 @@
 typedef struct {
     char *name;
     AstType *type;
+    Token tok; // For error tracking
     bool is_mut;
     bool is_fn;
+    bool is_referenced;
+    bool is_builtin; // To avoid making warning on builtin function/variable
     Param *params;
     int param_count;
     AstType *return_type;
@@ -73,7 +76,7 @@ static Symbol *scope_lookup(Scope *s, const char *name) {
     return NULL;
 }
 
-static Symbol *scope_add(Scope *s, const char *name) {
+static Symbol *scope_add(Scope *s, const char *name, Token tok) {
     if (s->count >= s->cap) {
         s->cap *= 2;
         s->syms = realloc(s->syms, sizeof(Symbol) * (size_t)s->cap);
@@ -81,10 +84,11 @@ static Symbol *scope_add(Scope *s, const char *name) {
     Symbol *sym = &s->syms[s->count++];
     memset(sym, 0, sizeof(Symbol));
     sym->name = (char *)name;
+    sym->tok = tok;
     return sym;
 }
 
-// ---- Error reporting ----
+// ---- Reporting system ----
 
 static void sema_error(Sema *ctx, Token *t, const char *fmt, ...) {
     char msg[1024];
@@ -96,6 +100,17 @@ static void sema_error(Sema *ctx, Token *t, const char *fmt, ...) {
 
     report_error(ctx->filename, t, msg);
     ctx->errors++;
+}
+
+static void sema_warn(Sema *ctx, Token *t, const char *fmt, ...) {
+    char msg[1024];
+
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msg, sizeof(msg), fmt, args);
+    va_end(args);
+
+    report_warn(ctx->filename, t, msg);
 }
 
 // ---- Forward declarations ----
@@ -132,6 +147,7 @@ static AstType *check_expr(Sema *ctx, AstNode *node) {
             sema_error(ctx, &node->tok, "undefined variable '%s'", node->as.ident.name);
             return set_type(node, ast_type_simple(TYPE_VOID));
         }
+        sym->is_referenced = true;
         return set_type(node, ast_type_clone(sym->type));
     }
 
@@ -254,6 +270,7 @@ static AstType *check_expr(Sema *ctx, AstNode *node) {
 
         const char *fn_name = node->as.call.callee->as.ident.name;
         Symbol *sym = scope_lookup(ctx->current, fn_name);
+        sym->is_referenced = true;
         if (!sym) {
             sema_error(ctx, &node->tok, "undefined function '%s'", fn_name);
             for (int i = 0; i < node->as.call.arg_count; i++)
@@ -474,7 +491,7 @@ static void check_stmt(Sema *ctx, AstNode *node) {
                        node->as.let_stmt.name);
         }
 
-        Symbol *sym = scope_add(ctx->current, node->as.let_stmt.name);
+        Symbol *sym = scope_add(ctx->current, node->as.let_stmt.name, node->tok);
         sym->type = decl_type;
         sym->is_mut = node->as.let_stmt.is_mut;
         break;
@@ -540,7 +557,7 @@ static void check_stmt(Sema *ctx, AstNode *node) {
 
             Scope *body_scope = scope_new(ctx->current);
             ctx->current = body_scope;
-            Symbol *loop_var = scope_add(body_scope, node->as.for_stmt.var_name);
+            Symbol *loop_var = scope_add(body_scope, node->as.for_stmt.var_name, node->tok);
             loop_var->type = elem_type;
             loop_var->is_mut = false;
 
@@ -566,7 +583,7 @@ static void check_stmt(Sema *ctx, AstNode *node) {
 
             Scope *body_scope = scope_new(ctx->current);
             ctx->current = body_scope;
-            Symbol *loop_var = scope_add(body_scope, node->as.for_stmt.var_name);
+            Symbol *loop_var = scope_add(body_scope, node->as.for_stmt.var_name, node->tok);
             loop_var->type = ast_type_simple(TYPE_INT);
             loop_var->is_mut = false;
 
@@ -670,7 +687,7 @@ static void check_stmt(Sema *ctx, AstNode *node) {
             Scope *arm_scope = scope_new(ctx->current);
             ctx->current = arm_scope;
             for (int b = 0; b < arm->binding_count && b < variant->field_count; b++) {
-                Symbol *binding = scope_add(arm_scope, arm->bindings[b]);
+                Symbol *binding = scope_add(arm_scope, arm->bindings[b], node->tok);
                 binding->type = ast_type_clone(variant->fields[b].type);
                 binding->is_mut = false;
             }
@@ -689,12 +706,29 @@ static void check_stmt(Sema *ctx, AstNode *node) {
     }
 }
 
+static void check_unused_symbols(Sema *ctx, Scope *s) {
+    for (int i = 0; i < s->count; i++) {
+        Symbol *sym = &s->syms[i];
+        if (sym->name[0] != '_' && strcmp(sym->name, "main") != 0 && !sym->is_builtin &&
+                !sym->is_referenced) {
+            char *type = "variable";
+            if (sym->is_fn) type = "function";
+            else if (sym->is_struct) type = "struct";
+            else if (sym->is_enum) type = "enum";
+
+            if (type[0] != 'v') report(ctx->filename, "In %s '%s':", type, sym->name);
+            sema_warn(ctx, &sym->tok, "unused %s '%s'", type, sym->name);
+        }
+    }
+}
+
 static void check_block(Sema *ctx, AstNode *node) {
     Scope *block_scope = scope_new(ctx->current);
     ctx->current = block_scope;
     for (int i = 0; i < node->as.block.stmt_count; i++) {
         check_stmt(ctx, node->as.block.stmts[i]);
     }
+    check_unused_symbols(ctx, block_scope);
     ctx->current = block_scope->parent;
     scope_free(block_scope);
 }
@@ -703,8 +737,9 @@ static void check_block(Sema *ctx, AstNode *node) {
 
 static void add_builtin(Scope *global, const char *name, AstType *ret,
                         int nparams, ...) {
-    Symbol *s = scope_add(global, name);
+    Symbol *s = scope_add(global, name, (Token){0});
     s->is_fn = true;
+    s->is_builtin = true;
     s->param_count = nparams;
     s->return_type = ret;
     if (nparams > 0) {
@@ -789,7 +824,7 @@ bool sema_analyze(AstNode *program, const char *filename) {
                 sema_error(&ctx, &d->tok, "duplicate struct '%s'", d->as.struct_decl.name);
                 continue;
             }
-            Symbol *s = scope_add(global, d->as.struct_decl.name);
+            Symbol *s = scope_add(global, d->as.struct_decl.name, d->tok);
             s->is_struct = true;
             s->fields = d->as.struct_decl.fields;
             s->field_count = d->as.struct_decl.field_count;
@@ -799,7 +834,7 @@ bool sema_analyze(AstNode *program, const char *filename) {
                 sema_error(&ctx, &d->tok, "duplicate enum '%s'", d->as.enum_decl.name);
                 continue;
             }
-            Symbol *s = scope_add(global, d->as.enum_decl.name);
+            Symbol *s = scope_add(global, d->as.enum_decl.name, d->tok);
             s->is_enum = true;
             s->variants = d->as.enum_decl.variants;
             s->variant_count = d->as.enum_decl.variant_count;
@@ -815,7 +850,7 @@ bool sema_analyze(AstNode *program, const char *filename) {
                            d->as.fn_decl.return_type->name);
                 continue;
             }
-            Symbol *s = scope_add(global, d->as.fn_decl.name);
+            Symbol *s = scope_add(global, d->as.fn_decl.name, d->tok);
             s->is_fn = true;
             s->params = d->as.fn_decl.params;
             s->param_count = d->as.fn_decl.param_count;
@@ -832,7 +867,7 @@ bool sema_analyze(AstNode *program, const char *filename) {
             ctx.current_fn_return = d->as.fn_decl.return_type;
 
             for (int j = 0; j < d->as.fn_decl.param_count; j++) {
-                Symbol *p = scope_add(fn_scope, d->as.fn_decl.params[j].name);
+                Symbol *p = scope_add(fn_scope, d->as.fn_decl.params[j].name, d->tok);
                 p->type = d->as.fn_decl.params[j].type;
                 p->is_mut = false;
             }
@@ -842,11 +877,13 @@ bool sema_analyze(AstNode *program, const char *filename) {
                 check_stmt(&ctx, body->as.block.stmts[j]);
             }
 
+            check_unused_symbols(&ctx, fn_scope);
             ctx.current = global;
             scope_free(fn_scope);
         }
     }
 
+    check_unused_symbols(&ctx, global);
     scope_free(global);
     return ctx.errors == 0;
 }
