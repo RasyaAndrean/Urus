@@ -1,0 +1,6 @@
+Perbaikan segera :
+
+1. Mempersiapkan linter dan formatter
+2. Membuat stdlib
+3. Membuat example code
+4. Membuat unit test
