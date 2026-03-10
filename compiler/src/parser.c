@@ -460,7 +460,7 @@ static AstNode *parse_expr(Parser *p) {
 
 static AstNode *parse_block(Parser *p) {
     expect(p, TOK_LBRACE, "expected '{'");
-    AstNode *block = ast_new(NODE_BLOCK, current(p));
+    AstNode *block = ast_new(NODE_BLOCK, previous(p));
     int cap = 8, count = 0;
     AstNode **stmts = malloc(sizeof(AstNode *) * (size_t)cap);
     while (!check(p, TOK_RBRACE) && !at_end(p)) {
@@ -486,7 +486,7 @@ static AstNode *parse_let(Parser *p) {
     expect(p, TOK_ASSIGN, "expected '=' in let statement");
     AstNode *init = parse_expr(p);
     expect(p, TOK_SEMICOLON, "expected ';' after let statement");
-    AstNode *n = ast_new(NODE_LET_STMT, current(p));
+    AstNode *n = ast_new(NODE_LET_STMT, name);
     n->as.let_stmt.name = tok_str(name);
     n->as.let_stmt.is_mut = is_mut;
     n->as.let_stmt.type = type;
@@ -495,7 +495,7 @@ static AstNode *parse_let(Parser *p) {
 }
 
 static AstNode *parse_if(Parser *p) {
-    expect(p, TOK_IF, "expected 'if'");
+    Token if_tok = expect(p, TOK_IF, "expected 'if'");
     AstNode *cond = parse_expr(p);
     AstNode *then_block = parse_block(p);
     AstNode *else_branch = NULL;
@@ -506,7 +506,7 @@ static AstNode *parse_if(Parser *p) {
             else_branch = parse_block(p);
         }
     }
-    AstNode *n = ast_new(NODE_IF_STMT, current(p));
+    AstNode *n = ast_new(NODE_IF_STMT, if_tok);
     n->as.if_stmt.condition = cond;
     n->as.if_stmt.then_block = then_block;
     n->as.if_stmt.else_branch = else_branch;
@@ -514,17 +514,17 @@ static AstNode *parse_if(Parser *p) {
 }
 
 static AstNode *parse_while(Parser *p) {
-    expect(p, TOK_WHILE, "expected 'while'");
+    Token while_tok = expect(p, TOK_WHILE, "expected 'while'");
     AstNode *cond = parse_expr(p);
     AstNode *body = parse_block(p);
-    AstNode *n = ast_new(NODE_WHILE_STMT, current(p));
+    AstNode *n = ast_new(NODE_WHILE_STMT, while_tok);
     n->as.while_stmt.condition = cond;
     n->as.while_stmt.body = body;
     return n;
 }
 
 static AstNode *parse_for(Parser *p) {
-    expect(p, TOK_FOR, "expected 'for'");
+    Token for_tok = expect(p, TOK_FOR, "expected 'for'");
     Token var = expect(p, TOK_IDENT, "expected loop variable");
     expect(p, TOK_IN, "expected 'in'");
     AstNode *expr = parse_expr(p);
@@ -535,7 +535,7 @@ static AstNode *parse_for(Parser *p) {
         if (!inclusive) expect(p, TOK_DOTDOT, "expected '..'");
         AstNode *end = parse_expr(p);
         AstNode *body = parse_block(p);
-        AstNode *n = ast_new(NODE_FOR_STMT, current(p));
+        AstNode *n = ast_new(NODE_FOR_STMT, for_tok);
         n->as.for_stmt.var_name = tok_str(var);
         n->as.for_stmt.start = expr;
         n->as.for_stmt.end = end;
@@ -548,7 +548,7 @@ static AstNode *parse_for(Parser *p) {
 
     // For-each: for item in iterable { ... }
     AstNode *body = parse_block(p);
-    AstNode *n = ast_new(NODE_FOR_STMT, current(p));
+    AstNode *n = ast_new(NODE_FOR_STMT, for_tok);
     n->as.for_stmt.var_name = tok_str(var);
     n->as.for_stmt.start = NULL;
     n->as.for_stmt.end = NULL;
@@ -560,13 +560,13 @@ static AstNode *parse_for(Parser *p) {
 }
 
 static AstNode *parse_return(Parser *p) {
-    expect(p, TOK_RETURN, "expected 'return'");
+    Token return_tok = expect(p, TOK_RETURN, "expected 'return'");
     AstNode *val = NULL;
     if (!check(p, TOK_SEMICOLON)) {
         val = parse_expr(p);
     }
     expect(p, TOK_SEMICOLON, "expected ';' after return");
-    AstNode *n = ast_new(NODE_RETURN_STMT, current(p));
+    AstNode *n = ast_new(NODE_RETURN_STMT, return_tok);
     n->as.return_stmt.value = val;
     return n;
 }
@@ -581,7 +581,7 @@ static bool is_assign_op(TokenType t) {
 }
 
 static AstNode *parse_match(Parser *p) {
-    expect(p, TOK_MATCH, "expected 'match'");
+    Token match_tok = expect(p, TOK_MATCH, "expected 'match'");
     AstNode *target = parse_expr(p);
     expect(p, TOK_LBRACE, "expected '{' after match target");
 
@@ -626,7 +626,7 @@ static AstNode *parse_match(Parser *p) {
     }
     expect(p, TOK_RBRACE, "expected '}' after match arms");
 
-    AstNode *n = ast_new(NODE_MATCH, current(p));
+    AstNode *n = ast_new(NODE_MATCH, match_tok);
     n->as.match_stmt.target = target;
     n->as.match_stmt.arms = arms;
     n->as.match_stmt.arm_count = count;
@@ -701,7 +701,7 @@ static AstNode *parse_fn_decl(Parser *p) {
 
     AstNode *body = parse_block(p);
 
-    AstNode *n = ast_new(NODE_FN_DECL, current(p));
+    AstNode *n = ast_new(NODE_FN_DECL, name);
     n->as.fn_decl.name = tok_str(name);
     n->as.fn_decl.params = params;
     n->as.fn_decl.param_count = count;
@@ -711,7 +711,7 @@ static AstNode *parse_fn_decl(Parser *p) {
 }
 
 static AstNode *parse_struct_decl(Parser *p) {
-    expect(p, TOK_STRUCT, "expected 'struct'");
+    Token struct_tok = expect(p, TOK_STRUCT, "expected 'struct'");
     Token name = expect(p, TOK_IDENT, "expected struct name");
     expect(p, TOK_LBRACE, "expected '{'");
 
@@ -732,7 +732,7 @@ static AstNode *parse_struct_decl(Parser *p) {
     }
     expect(p, TOK_RBRACE, "expected '}'");
 
-    AstNode *n = ast_new(NODE_STRUCT_DECL, current(p));
+    AstNode *n = ast_new(NODE_STRUCT_DECL, struct_tok);
     n->as.struct_decl.name = tok_str(name);
     n->as.struct_decl.fields = fields;
     n->as.struct_decl.field_count = count;
@@ -740,7 +740,7 @@ static AstNode *parse_struct_decl(Parser *p) {
 }
 
 static AstNode *parse_enum_decl(Parser *p) {
-    expect(p, TOK_ENUM, "expected 'enum'");
+    Token enum_tok = expect(p, TOK_ENUM, "expected 'enum'");
     Token name = expect(p, TOK_IDENT, "expected enum name");
     expect(p, TOK_LBRACE, "expected '{'");
 
@@ -784,7 +784,7 @@ static AstNode *parse_enum_decl(Parser *p) {
     }
     expect(p, TOK_RBRACE, "expected '}'");
 
-    AstNode *n = ast_new(NODE_ENUM_DECL, current(p));
+    AstNode *n = ast_new(NODE_ENUM_DECL, enum_tok);
     n->as.enum_decl.name = tok_str(name);
     n->as.enum_decl.variants = variants;
     n->as.enum_decl.variant_count = count;
@@ -792,10 +792,10 @@ static AstNode *parse_enum_decl(Parser *p) {
 }
 
 static AstNode *parse_import(Parser *p) {
-    expect(p, TOK_IMPORT, "expected 'import'");
+    Token import_tok = expect(p, TOK_IMPORT, "expected 'import'");
     Token path = expect(p, TOK_STR_LIT, "expected module path string");
     expect(p, TOK_SEMICOLON, "expected ';' after import");
-    AstNode *n = ast_new(NODE_IMPORT, current(p));
+    AstNode *n = ast_new(NODE_IMPORT, import_tok);
     n->as.import_decl.path = tok_str_value(path);
     return n;
 }
