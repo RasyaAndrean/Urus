@@ -1,0 +1,8 @@
+fn test(): void {
+    print("hello from test");
+}
+
+fn main(): void {
+    let x: int = 12;
+    print("Hello World");
+}
