@@ -95,6 +95,16 @@ bool ast_types_equal(AstType *a, AstType *b) {
     return true;
 }
 
+bool ast_types_compatible(AstType *from, AstType *to) {
+    if (!from || !to) return false;
+    if (ast_types_equal(from, to)) return true;
+    if (from->kind == TYPE_INT && to->kind == TYPE_FLOAT) return true;
+    if (from->kind == TYPE_ARRAY && to->kind == TYPE_ARRAY) {
+        if (from->element->kind == TYPE_INT && to->element->kind == TYPE_FLOAT) return true;
+    }
+    return false;
+}
+
 // Round-robin static buffers to avoid clobber in printf with multiple calls
 const char *ast_type_str(AstType *t) {
     static char bufs[4][256];

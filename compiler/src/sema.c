@@ -398,6 +398,7 @@ static AstType *check_expr(Sema *ctx, AstNode *node) {
                            ast_type_str(elem_type), ast_type_str(t));
             }
         }
+        // NOTE: 'left = []' considered as INT type
         if (!elem_type) elem_type = ast_type_simple(TYPE_INT);
         return set_type(node, ast_type_array(ast_type_clone(elem_type)));
     }
@@ -505,7 +506,7 @@ static void check_stmt(Sema *ctx, AstNode *node) {
         AstType *init_type = check_expr(ctx, node->as.let_stmt.init);
         AstType *decl_type = node->as.let_stmt.type;
 
-        if (init_type && decl_type && !ast_types_equal(init_type, decl_type)) {
+        if (init_type && decl_type && (!ast_types_equal(init_type, decl_type) && !ast_types_compatible(init_type, decl_type))) {
             // Allow Result type coercion (Ok/Err assign to Result<T,E>)
             if (!(decl_type->kind == TYPE_RESULT &&
                   (node->as.let_stmt.init->kind == NODE_OK_EXPR ||
@@ -538,7 +539,7 @@ static void check_stmt(Sema *ctx, AstNode *node) {
             }
         }
 
-        if (target_type && val_type && !ast_types_equal(target_type, val_type)) {
+        if (target_type && val_type && (!ast_types_equal(target_type, val_type)) && !ast_types_compatible(val_type, target_type)) {
             sema_error(ctx, &node->tok, "cannot assign '%s' to '%s'",
                        ast_type_str(val_type), ast_type_str(target_type));
         }

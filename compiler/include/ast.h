@@ -271,6 +271,7 @@ char *ast_strdup(const char *s, size_t len);
 // Type utilities
 AstType *ast_type_clone(AstType *t);
 bool ast_types_equal(AstType *a, AstType *b);
+bool ast_types_compatible(AstType *from, AstType *to); // check if its compatible (fair). Example: let x: float = 1;
 const char *ast_type_str(AstType *t); // returns static buffer (round-robin)
 
 // Debug printing
