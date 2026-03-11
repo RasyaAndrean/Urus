@@ -143,7 +143,7 @@ static AstType *check_expr(Sema *ctx, AstNode *node) {
 
     case NODE_IDENT: {
         Symbol *sym = scope_lookup(ctx->current, node->as.ident.name);
-        if (!sym) {
+        if (!sym || (sym->is_fn || sym->is_enum || sym->is_struct)) {
             sema_error(ctx, &node->tok, "undefined variable '%s'", node->as.ident.name);
             return set_type(node, ast_type_simple(TYPE_VOID));
         }
@@ -366,6 +366,7 @@ static AstType *check_expr(Sema *ctx, AstNode *node) {
         }
         for (int i = 0; i < st->field_count; i++) {
             if (strcmp(st->fields[i].name, node->as.field_access.field) == 0) {
+                st->is_referenced = true;
                 return set_type(node, ast_type_clone(st->fields[i].type));
             }
         }

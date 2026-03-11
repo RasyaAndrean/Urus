@@ -1,0 +1,12 @@
+struct Data {
+    name: str;
+    age: int;
+    struct Test {
+        sub: str
+    }
+}
+
+fn main(): void {
+    let data: Data = Data {name:"John", age:14, Test.sub: "a"};
+    print(data.name);
+}
