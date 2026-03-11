@@ -1,0 +1,8 @@
+fn test(name: str = "John" + "Fried", age: int) {
+    print(f"Hi {name}!. Are you {age + 20} year old?");
+    print(f"{name}: NO, im {age} year old");
+}
+
+fn main() {
+    test();
+}
