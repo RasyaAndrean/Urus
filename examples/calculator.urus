@@ -1,0 +1,35 @@
+fn divide(a: float, b: float): Result<float, str> {
+    if b == 0.0 {
+        return Err("Error: division by zero");
+    }
+    return Ok(a / b);
+}
+
+fn main(): void {
+    print("=== Simple Calculator ===");
+    print("Enter first number:");
+    let a: float = to_float(input());
+
+    print("Enter operator (+, -, *, /):");
+    let op: str = input();
+
+    print("Enter second number:");
+    let b: float = to_float(input());
+
+    if op == "+" {
+        print(f"Result: {a + b}");
+    } else if op == "-" {
+        print(f"Result: {a - b}");
+    } else if op == "*" {
+        print(f"Result: {a * b}");
+    } else if op == "/" {
+        let r: Result<float, str> = divide(a, b);
+        if is_err(r) {
+            print(unwrap_err(r));
+        } else {
+            print(f"Result: {unwrap(r)}");
+        }
+    } else {
+        print(f"Unknown operator: {op}");
+    }
+}

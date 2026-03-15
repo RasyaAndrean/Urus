@@ -1,0 +1,57 @@
+fn celsius_to_fahrenheit(c: float): float {
+    return (c * 9.0 / 5.0) + 32.0;
+}
+
+fn celsius_to_kelvin(c: float): float {
+    return c + 273.15;
+}
+
+fn fahrenheit_to_celsius(f: float): float {
+    return (f - 32.0) * 5.0 / 9.0;
+}
+
+fn kelvin_to_celsius(k: float): Result<float, str> {
+    if k < 0.0 {
+        return Err("Kelvin cannot be negative");
+    }
+    return Ok(k - 273.15);
+}
+
+fn main(): void {
+    print("=== Temperature Converter ===");
+    print("Choose input unit:");
+    print("1. Celsius");
+    print("2. Fahrenheit");
+    print("3. Kelvin");
+
+    let choice: str = str_trim(input());
+   // print(f"DEBUG choice: '{choice}'");
+   // print(f"DEBUG len: {str_len(choice)}");
+
+    print("Enter temperature:");
+    let temp: float = to_float(str_trim(input()));
+
+    if str_contains(choice, "1") {
+        let f: float = celsius_to_fahrenheit(temp);
+        let k: float = celsius_to_kelvin(temp);
+        print(f"{temp}°C = {f}°F");
+        print(f"{temp}°C = {k}K");
+    } else if str_contains(choice, "2") {
+        let c: float = fahrenheit_to_celsius(temp);
+        let k: float = celsius_to_kelvin(c);
+        print(f"{temp}°F = {c}°C");
+        print(f"{temp}°F = {k}K");
+    } else if str_contains(choice, "3") {
+        let r: Result<float, str> = kelvin_to_celsius(temp);
+        if is_err(r) {
+            print(f"Error: {unwrap_err(r)}");
+        } else {
+            let c: float = unwrap(r);
+            let f: float = celsius_to_fahrenheit(c);
+            print(f"{temp}K = {c}°C");
+            print(f"{temp}K = {f}°F");
+        }
+    } else {
+        print("Invalid choice.");
+    }
+}
