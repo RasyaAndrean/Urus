@@ -1,5 +1,3 @@
-// TODO: Refractor, because this file has DRY code
-
 #include "token.h"
 #include "error.h"
 #include <stdio.h>
@@ -33,14 +31,14 @@ static void _diag(const char *filename, Token *t) {
 
 void report_error(const char *filename, Token *t, const char *msg) {
     fprintf(stderr, "\x1b[1m%s:", filename);
-    if (t) fprintf(stderr, "%d:", t->line);
+    if (t) fprintf(stderr, "%d:%d", t->line, t->col);
     fprintf(stderr, " \x1b[31mError\x1b[0m: %s\n", msg);
     if (t) _diag(filename, t);
 }
 
 void report_warn(const char *filename, Token *t, const char *msg) {
     fprintf(stderr, "\x1b[1m%s:", filename);
-    if (t) fprintf(stderr, "%d:", t->line);
+    if (t) fprintf(stderr, "%d:%d", t->line, t->col);
     fprintf(stderr, " \x1b[35mWarning\x1b[0m: %s\n", msg);
     if (t) _diag(filename, t);
 }
