@@ -203,7 +203,7 @@ static void show_help(char *progname) {
         "  --tokens    Display Lexer tokens\n"
         "  --ast       Display the Abstract Syntax Tree (AST)\n"
         "  --emit-c    Print generated C code to stdout\n"
-        "  -o <file>   Specify output executable name (default: a.exe)\n\n"
+        "  -o <file>   Specify output executable name (default: a.out on Linux, a.exe on Windows)\n\n"
         "Example:\n"
         "  %s main.urus -o app \n", progname, progname
     );
@@ -330,7 +330,11 @@ int main(int argc, char **argv) {
         printf("%s", cbuf.data);
     } else {
         const char *c_path = "_urus_tmp.c";
+#ifdef _WIN32
         const char *out_path = output ? output : "a.exe";
+#else
+        const char *out_path = output ? output : "a.out";
+#endif
 
         FILE *f = fopen(c_path, "wb");
         if (!f) {
