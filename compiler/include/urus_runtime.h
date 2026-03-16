@@ -12,7 +12,7 @@
 #include <ctype.h>
 
 // ============================================================
-// RAII (utility)
+// RAII
 // ============================================================
 
 #if defined(__clang__) || defined(__GNUC__)
@@ -46,6 +46,13 @@ static void urus_str_drop(urus_str **sp) {
         free(*sp);
         *sp = NULL;
     }
+}
+
+static inline bool urus_str_equal(urus_str *a, urus_str *b) {
+    if (a == b) return true; // compare address
+    if (a->data== b->data) return true; // compare address
+    if (a->len != b->len) return false;
+    return memcmp(a->data, b->data, a->len) == 0;
 }
 
 static urus_str *urus_str_from(const char *s) {
