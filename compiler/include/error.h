@@ -1,5 +1,5 @@
-#ifndef SEMA_ERROR_H
-#define SEMA_ERROR_H
+#ifndef URUS_ERROR_H
+#define URUS_ERROR_H
 
 #include "token.h"
 

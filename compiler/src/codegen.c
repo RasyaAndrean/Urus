@@ -208,6 +208,17 @@ static void gen_expr(CodeBuf *buf, AstNode *node) {
         emit(buf, "%s", node->as.ident.name);
         break;
     case NODE_BINARY:
+        if ((node->as.binary.op == TOK_EQ || node->as.binary.op == TOK_NEQ) &&
+                node->as.binary.left->resolved_type->kind == TYPE_STR) {
+            emit(buf, "(%surus_%s_equal(", node->as.binary.op == TOK_EQ ? "" : "!",
+                    ast_type_str(node->as.binary.left->resolved_type));
+            gen_expr(buf, node->as.binary.left);
+            emit(buf, ", ");
+            gen_expr(buf, node->as.binary.right);
+            emit(buf, "))");
+            break;
+        }
+
         if (node->as.binary.op == TOK_PLUS && expr_is_string(node)) {
             emit(buf, "urus_str_concat(");
             gen_expr(buf, node->as.binary.left);
@@ -767,7 +778,6 @@ static void gen_enum_decl(CodeBuf *buf, AstNode *node) {
 
     // Tagged union struct
     emit(buf, "typedef struct %s {\n", name);
-    emit(buf, "    int rc;\n");
     emit(buf, "    int tag;\n");
     emit(buf, "    union {\n");
     for (int i = 0; i < node->as.enum_decl.variant_count; i++) {
