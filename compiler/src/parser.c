@@ -734,9 +734,12 @@ static AstNode *parse_struct_decl(Parser *p) {
             fields = realloc(fields, sizeof(Param) * (size_t)cap);
         }
         Token fname = expect(p, TOK_IDENT, "expected field name");
+        if (p->had_error) break;
         expect(p, TOK_COLON, "expected ':' after field name");
+        if (p->had_error) break;
         AstType *ftype = parse_type(p);
         expect(p, TOK_SEMICOLON, "expected ';' after field");
+        if (p->had_error) break;
         fields[count].name = tok_str(fname);
         fields[count].type = ftype;
         count++;
@@ -764,6 +767,7 @@ static AstNode *parse_enum_decl(Parser *p) {
             variants = realloc(variants, sizeof(EnumVariant) * (size_t)cap);
         }
         Token vname = expect(p, TOK_IDENT, "expected variant name");
+        if (p->had_error) break;
         variants[count].name = tok_str(vname);
         variants[count].fields = NULL;
         variants[count].field_count = 0;
@@ -778,19 +782,24 @@ static AstNode *parse_enum_decl(Parser *p) {
                         fields = realloc(fields, sizeof(Param) * (size_t)fcap);
                     }
                     Token fname = expect(p, TOK_IDENT, "expected field name");
+                    if (p->had_error) break;
                     expect(p, TOK_COLON, "expected ':' after field name");
+                    if (p->had_error) break;
                     AstType *ftype = parse_type(p);
                     fields[fcount].name = tok_str(fname);
                     fields[fcount].type = ftype;
                     fcount++;
                 } while (match(p, TOK_COMMA));
             }
+            if (p->had_error) break;
             expect(p, TOK_RPAREN, "expected ')' after variant fields");
+            if (p->had_error) break;
             variants[count].fields = fields;
             variants[count].field_count = fcount;
         }
 
         expect(p, TOK_SEMICOLON, "expected ';' after variant");
+        if (p->had_error) break;
         count++;
     }
     expect(p, TOK_RBRACE, "expected '}'");

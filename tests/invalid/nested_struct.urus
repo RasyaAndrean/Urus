@@ -1,0 +1,13 @@
+struct John {
+    realname: str;
+    age: int;
+    struct Skills {
+        programming: [str];
+        total_commit: int;
+    }
+}
+
+fn main(): void {
+    let bayu: John = John { realname: "Bayu", age: 14 };
+    print(bayu.realname);
+}
