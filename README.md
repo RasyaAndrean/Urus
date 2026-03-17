@@ -53,23 +53,33 @@ URUS **V0.2/2(F) "Fixed"** is in active development. The core language syntax an
 
 ### Build from Source
 
+#### 1. Clone repo:
 ```bash
 git clone https://github.com/Urus-Foundation/Urus.git
 cd Urus/compiler
-
-cmake -S . -B build
-cmake --build build
 ```
 
-Install to system:
+#### 2. Build (Linux/MacOS/Windows):
+```bash
+cmake -S . -B build/
+cmake --build build/
+```
+if you're using **Termux**:
+```bash
+cmake -S . -B build/ -DCMAKE_INSTALL_PREFIX=$PREFIX
+cmake --build build/
+```
+
+#### 3. Install to system:
 
 ```bash
-# Linux / macOS
+# Linux / macOS / Termux
 sudo cmake --install build
 
 # Windows (Run As Administrator)
 cmake --install build
 ```
+> Having trouble installing? Report [Troubleshooting](https://github.com/Urus-Foundation/Urus/issues/new?template=complaint.md)
 
 ### Prebuilt Binary
 
