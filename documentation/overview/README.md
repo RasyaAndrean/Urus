@@ -86,10 +86,12 @@ URUS takes a **transpiler** approach: source code is first translated to C, then
 | Error handling | `Result<T, E>` type with `Ok`/`Err` |
 | Reference counting | Automatic memory management for strings, arrays, structs |
 | Modules | `import "file.urus"` for multi-file projects |
+| Struct spread syntax | `Point { x: 10.0, ..p1 }` — functional update |
+| Numeric separators | `1_000_000` — underscores in number literals |
 | Standalone compiler | Single binary, no external dependencies at runtime |
 
 ## Current Status
 
-**Version:** V0.2/2(F) "Fixed"
+**Version:** V0.2/3(A) "Added"
 
 The language is in active pre-stable development. Core features are functional and tested. See the [roadmap](../roadmap/) for planned features.

@@ -98,6 +98,38 @@ fn main(): void {
 }
 ```
 
+### Struct Spread (Functional Update)
+
+```urus
+struct Config {
+    width: int;
+    height: int;
+    fullscreen: bool;
+}
+
+fn main(): void {
+    let default_cfg: Config = Config { width: 800, height: 600, fullscreen: false };
+
+    // Create a new Config, copying fields from default_cfg but overriding width
+    let wide_cfg: Config = Config { width: 1920, ..default_cfg };
+    print(f"Width: {wide_cfg.width}, Height: {wide_cfg.height}");
+
+    // Full copy
+    let copy: Config = Config { ..default_cfg };
+}
+```
+
+### Numeric Separators
+
+```urus
+fn main(): void {
+    let million: int = 1_000_000;
+    let pi: float = 3.14_159;
+    let binary_ish: int = 0;  // underscores for visual grouping
+    print(f"Million: {million}, Pi: {pi}");
+}
+```
+
 ### Arrays
 
 ```urus

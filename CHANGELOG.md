@@ -1,5 +1,36 @@
 # Changelog
 
+## V0.2/3(A) "Added" (2026-03-17)
+
+### New Features
+- **Struct Spread Syntax**: `Point { x: 10.0, ..p1 }` — create a new struct by copying fields from an existing instance and selectively overriding fields (#47)
+- **Numeric Separators**: `1_000_000`, `3.14_159` — underscores as visual separators in integer and float literals (#49)
+
+### Bug Fixes
+- Fixed parser infinite loop on nested struct/enum with syntax errors — added error recovery breaks (#27)
+- Fixed empty struct literal `Abc{}` producing confusing error — parser now handles it correctly (#42)
+- Fixed string `+=` codegen — now generates `urus_str_concat()` instead of invalid C pointer arithmetic (#43)
+- Fixed trailing decimal float `20.` not accepted by lexer — changed condition to allow floats without fractional digits (#48)
+- Fixed garbage column numbers in sema error messages — `lexer_init()` was not initializing `line_start` field (#50)
+- Fixed undefined function call causing segfault (PR #45)
+- Fixed more accurate semantic error messages (PR #44)
+- Fixed default output name based on platform: `a.out` (Linux), `a.exe` (Windows) (PR #39)
+- Fixed version mismatch in Dockerfile
+- Removed `inline` from `urus_str_equal` — GCC `-O2` already handles inlining
+
+### Improvements
+- Added Termux (Android) build instructions in README
+- Editor support separated into dedicated repo: `Urus-Foundation/editor-support`
+- Assets and diary moved to `Urus-Foundation/initial-resource`
+- GitHub issue templates standardized to English (PR #38)
+
+### Contributors
+- **fepfitra** — issue reports (#27, #42, #43, #47, #48, #49, #50), default output name fix (PR #39)
+- **John-fried** — segfault fix (PR #45), error accuracy (PR #44), assets removal (PR #40), issue templates (PR #38)
+- **RasyaAndrean** — bug fixes, feature implementation, documentation, repo management
+
+---
+
 ## V0.2/2(F) "Fixed" (2026-03-09)
 
 ### Build System

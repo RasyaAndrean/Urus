@@ -5,8 +5,9 @@
 | Version | Status | Date | Highlight |
 |---------|--------|------|-----------|
 | V0.1 | Released | 2025 | Initial prototype — lexer, parser, basic codegen |
-| V0.2/1 | Released | 2026-03 | Enums, match, imports, Result, f-strings, refcounting |
-| V0.2/2(F) | Released | 2026-03 | CMake, standalone compiler, error diagnostics, cross-platform fixes |
+| V0.2/1 | Released | 2026-03-02 | Enums, match, imports, Result, f-strings, refcounting |
+| V0.2/2(F) | Released | 2026-03-09 | CMake, standalone compiler, error diagnostics, cross-platform fixes |
+| V0.2/3(A) | Released | 2026-03-17 | Struct spread syntax, numeric separators, bug fixes (#27,#42,#43,#47,#48,#49,#50) |
 
 ## Versioning Scheme
 
@@ -53,13 +54,13 @@ URUS uses a custom versioning format: `V{major}.{minor}/{patch}(tag)`
 
 ---
 
-## Current: V0.2/2(F) "Fixed"
+## Current: V0.2/3(A) "Added"
 
 Features included:
 - Primitive types: `int`, `float`, `bool`, `str`, `void`
 - Variables (immutable by default, `mut` for mutable)
 - Functions
-- Structs
+- Structs with functional update (spread) syntax: `Type { field: val, ..source }`
 - Arrays (dynamic, growable)
 - Enums / tagged unions
 - Pattern matching (`match`)
@@ -67,12 +68,13 @@ Features included:
 - Modules / imports
 - For-each loops (`for item in array { ... }`)
 - Error handling (`Result<T, E>`, `Ok`, `Err`)
+- Numeric separators: `1_000_000`, `3.14_159`
 - Reference counting memory management
 - File I/O
-- Full test suite
+- Full test suite (14 run, 11 invalid, 2 valid)
 - CMake build system
 - Standalone compiler (runtime embedded)
-- Rich error diagnostics
+- Rich error diagnostics with accurate line/column numbers
 
 ---
 
@@ -149,6 +151,7 @@ Features included:
 2025 Q4  ── V0.1 prototype (done)
 2026 Q1  ── V0.2/1 core features (done)
 2026 Q1  ── V0.2/2(F) bug fixes (done)
+2026 Q1  ── V0.2/3(A) spread syntax, numeric separators, bug fixes (done)
 2026 Q2  ── V0.3/1 quality of life
 2026 Q3  ── V0.4/1 type system
 2026 Q4  ── V0.5/1 methods & traits

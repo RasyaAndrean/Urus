@@ -171,13 +171,13 @@ bash run_tests.sh ../compiler/build/urusc
 run_tests.bat ..\compiler\build\Release\urusc.exe
 ```
 
-### Current Test Results (V0.2/2(F))
+### Current Test Results (V0.2/3(A))
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Run tests | 10 | All PASS |
-| Example programs | 8 | All PASS |
-| Invalid file tests | 8 | All PASS |
+| Run tests | 14 | All PASS |
+| Valid programs | 2 | All PASS |
+| Invalid file tests | 11 | All PASS |
 | CLI flags | 6 | All functional |
 
 ## How to Add a New Feature

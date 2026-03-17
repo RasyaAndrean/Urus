@@ -1,6 +1,6 @@
 # URUS Documentation
 
-Complete documentation for URUS Programming Language V0.2/2(F).
+Complete documentation for URUS Programming Language V0.2/3(A).
 
 ## Table of Contents
 
@@ -42,7 +42,7 @@ URUS uses a custom versioning format: `V{major}.{minor}/{patch}(tag)`
 | `(E)` | Experimental — experimental features |
 | `(D)` | Dev — development version |
 
-Current version: **V0.2/2(F) "Fixed"**
+Current version: **V0.2/3(A) "Added"**
 
 ## Getting Started
 

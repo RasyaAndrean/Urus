@@ -19,6 +19,37 @@ URUS uses a custom versioning format: `V{major}.{minor}/{patch}(tag)`
 
 ---
 
+## V0.2/3(A) — 2026-03-17
+
+### Added
+- **Struct Functional Update (Spread) Syntax** — `Point { x: 10.0, ..p1 }` creates a new struct by copying fields from an existing instance and overriding specific fields (#47)
+- **Numeric Separator** — underscores in integer and float literals for readability: `1_000_000`, `3.14_159` (#49)
+- Termux (Android) build instructions in README
+
+### Fixed
+- **Parser infinite loop** on nested struct/enum errors — added `if (p->had_error) break;` recovery in struct and enum declaration parsing loops (#27)
+- **Empty struct literal** — `Abc{}` no longer produces confusing error, parser now handles empty struct literals correctly (#42)
+- **String `+=` codegen** — `s += "text"` now correctly generates `urus_str_concat()` instead of invalid C pointer arithmetic (#43)
+- **Trailing decimal float** — lexer now accepts `20.` as a valid float literal while preserving the range operator `0..10` (#48)
+- **Garbage column numbers in sema errors** — `lexer_init()` now initializes `line_start` to 0, fixing garbage values in f-string sub-lexer token positions (#50)
+- Undefined function call causing segfault (PR #45)
+- More accurate semantic error messages (PR #44)
+- Default output name based on platform: `a.out` (Linux), `a.exe` (Windows) (PR #39)
+- Version mismatch in Dockerfile
+- Removed `inline` from `urus_str_equal` — GCC `-O2` already handles inlining
+
+### Changed
+- Removed `assets/` folder from main repo (moved to `Urus-Foundation/initial-resource`)
+- Editor support separated into `Urus-Foundation/editor-support` repository
+- GitHub issue templates standardized to English (PR #38)
+
+### Contributors
+- **fepfitra** — issue reports (#27, #42, #43, #47, #48, #49, #50), default output name fix (PR #39)
+- **John-fried** — segfault fix (PR #45), error accuracy (PR #44), assets removal (PR #40), issue templates (PR #38)
+- **RasyaAndrean** — bug fixes, feature implementation, documentation
+
+---
+
 ## V0.2/2(F) — 2026-03-09
 
 ### Fixed
