@@ -698,7 +698,7 @@ static void gen_stmt(CodeBuf *buf, AstNode *node) {
             if (type_needs_rc(t) && node->as.return_stmt.value->kind == NODE_IDENT) {
                 // the identifier must be set to NULL to prevent destructed from URUS_RAII()
                 emit_indent(buf);
-                emit(buf, "%s = NULL // move to _urus_ret_%d\n", node->as.return_stmt.value->as.ident.name, tmp);
+                emit(buf, "%s = NULL; // move to _urus_ret_%d\n", node->as.return_stmt.value->as.ident.name, tmp);
             }
 
             emit_indent(buf);
