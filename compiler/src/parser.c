@@ -999,7 +999,7 @@ static AstNode *parse_fn_decl(Parser *p) {
                 params[count].default_value = parse_expr(p);
             } else {
                 if (count > 0 && params[count - 1].default_value != NULL) {
-                    error_at(p, name, "non-default argument follow default argument");
+                    error_at(p, pname, "non-default argument follow default argument");
                 }
                 params[count].default_value = NULL;
             }
