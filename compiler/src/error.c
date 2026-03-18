@@ -18,7 +18,14 @@ static void _diag(const char *filename, Token *t) {
 
                 fprintf(stderr, "  %-5d | %s\n", t->line, buffer);
                 fprintf(stderr, "        | ");
-                for (int j = 1; j < t->col; j++) fprintf(stderr, " ");
+                for (int j = 1; j < t->col; j++) {
+                    // Print as the real colwidth
+                    if (buffer[j - 1] != '\t') {
+                        fprintf(stderr, " ");
+                    } else {
+                        fprintf(stderr, "\t");
+                    }
+                }
                 fprintf(stderr, "\033[1;32m");
 
                 for (size_t k = 0; k < t->length; k++) fprintf(stderr, "^");
