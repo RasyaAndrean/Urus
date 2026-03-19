@@ -35,8 +35,11 @@ set(SOURCES
     src/parser.c
     src/util.c
     src/error.c
-    src/sema.c
+    src/Sema/sema.c
+    src/Sema/scope.c
+    src/Sema/builtins.c
     src/codegen.c
+    src/preprocess.c
 )
 
 add_executable(urusc ${SOURCES} ${URUS_RUNTIME_EMBEDDED})
