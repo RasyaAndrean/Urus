@@ -18,6 +18,9 @@ static void emit(CodeBuf *buf, const char *fmt, ...);
 static void emit_indent(CodeBuf *buf);
 
 // ---- Tuple typedef tracking ----
+static bool tuple_needs_drop(AstType *t);
+static bool type_needs_rc(AstType *t);
+
 static const char *tuple_type_name(AstType *t) {
     static char buf[512];
     int pos = snprintf(buf, sizeof(buf), "_urus_tuple");
@@ -63,6 +66,36 @@ static void emit_single_tuple_typedef(CodeBuf *buf, AstType *t) {
         emit(buf, " f%d; ", i);
     }
     emit(buf, "} %s;\n", name);
+
+    // Generate drop function if tuple contains heap types
+    bool needs_drop = false;
+    for (int i = 0; i < t->element_count; i++) {
+        if (t->element_types[i]->kind == TYPE_STR ||
+            t->element_types[i]->kind == TYPE_ARRAY ||
+            t->element_types[i]->kind == TYPE_RESULT ||
+            t->element_types[i]->kind == TYPE_NAMED ||
+            (t->element_types[i]->kind == TYPE_TUPLE && tuple_needs_drop(t->element_types[i]))) {
+            needs_drop = true;
+            break;
+        }
+    }
+    if (needs_drop) {
+        emit(buf, "static void %s_drop(%s *tp) {\n", name, name);
+        for (int i = 0; i < t->element_count; i++) {
+            AstType *ft = t->element_types[i];
+            if (ft->kind == TYPE_STR)
+                emit(buf, "    urus_str_drop(&tp->f%d);\n", i);
+            else if (ft->kind == TYPE_ARRAY)
+                emit(buf, "    urus_array_drop(&tp->f%d);\n", i);
+            else if (ft->kind == TYPE_RESULT)
+                emit(buf, "    urus_result_drop(&tp->f%d);\n", i);
+            else if (ft->kind == TYPE_NAMED)
+                emit(buf, "    %s_drop(&tp->f%d);\n", ft->name, i);
+            else if (ft->kind == TYPE_TUPLE && tuple_needs_drop(ft))
+                emit(buf, "    %s_drop(&tp->f%d);\n", tuple_type_name(ft), i);
+        }
+        emit(buf, "}\n");
+    }
 }
 
 static void collect_and_emit_tuple_typedefs_from_type(CodeBuf *buf, AstType *t) {
@@ -261,6 +294,14 @@ static bool type_needs_rc(AstType *t) {
     if (!t) return false;
     if (t->kind == TYPE_STR || t->kind == TYPE_ARRAY ||
             t->kind == TYPE_NAMED || t->kind == TYPE_RESULT) return true;
+    if (t->kind == TYPE_TUPLE) return tuple_needs_drop(t);
+    return false;
+}
+
+static bool tuple_needs_drop(AstType *t) {
+    for (int i = 0; i < t->element_count; i++) {
+        if (type_needs_rc(t->element_types[i])) return true;
+    }
     return false;
 }
 
@@ -743,6 +784,9 @@ static void gen_stmt(CodeBuf *buf, AstNode *node) {
             else if (node->as.let_stmt.type->kind == TYPE_RESULT) dtor = "urus_result_drop";
             else if (node->as.let_stmt.type->kind == TYPE_NAMED) {
                 emit(buf, "URUS_RAII(%s_drop) ", node->as.let_stmt.type->name);
+                needs_rc = false;
+            } else if (node->as.let_stmt.type->kind == TYPE_TUPLE) {
+                emit(buf, "URUS_RAII(%s_drop) ", tuple_type_name(node->as.let_stmt.type));
                 needs_rc = false;
             }
             if (needs_rc) emit(buf, "URUS_RAII(%s) ", dtor);
