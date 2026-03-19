@@ -184,7 +184,6 @@ void codegen_init(CodeBuf *buf) {
     buf->data[0] = '\0';
     buf->indent = 0;
     buf->tmp_counter = 0;
-    buf->current_scope = NULL;
 }
 
 void codegen_free(CodeBuf *buf) {
