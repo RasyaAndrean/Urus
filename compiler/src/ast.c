@@ -241,7 +241,16 @@ void ast_print(AstNode *node, int ind) {
         break;
 
     case NODE_LET_STMT:
-        printf("Let%s '%s': ", node->as.let_stmt.is_mut ? " mut" : "", node->as.let_stmt.name);
+        if (node->as.let_stmt.is_destructure) {
+            printf("Let%s (", node->as.let_stmt.is_mut ? " mut" : "");
+            for (int i = 0; i < node->as.let_stmt.name_count; i++) {
+                if (i > 0) printf(", ");
+                printf("%s", node->as.let_stmt.names[i]);
+            }
+            printf("): ");
+        } else {
+            printf("Let%s '%s': ", node->as.let_stmt.is_mut ? " mut" : "", node->as.let_stmt.name);
+        }
         print_type(node->as.let_stmt.type); printf("\n");
         ast_print(node->as.let_stmt.init, ind + 1);
         break;
@@ -495,6 +504,11 @@ void ast_free(AstNode *node) {
         break;
     case NODE_LET_STMT:
         free(node->as.let_stmt.name);
+        if (node->as.let_stmt.is_destructure) {
+            for (int i = 0; i < node->as.let_stmt.name_count; i++)
+                free(node->as.let_stmt.names[i]);
+            free(node->as.let_stmt.names);
+        }
         ast_type_free(node->as.let_stmt.type);
         ast_free(node->as.let_stmt.init);
         break;
@@ -513,6 +527,11 @@ void ast_free(AstNode *node) {
         break;
     case NODE_FOR_STMT:
         free(node->as.for_stmt.var_name);
+        if (node->as.for_stmt.is_destructure) {
+            for (int i = 0; i < node->as.for_stmt.var_count; i++)
+                free(node->as.for_stmt.var_names[i]);
+            free(node->as.for_stmt.var_names);
+        }
         ast_free(node->as.for_stmt.start);
         ast_free(node->as.for_stmt.end);
         ast_free(node->as.for_stmt.iterable);

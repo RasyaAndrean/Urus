@@ -777,8 +777,36 @@ static AstNode *parse_block(Parser *p) {
 }
 
 static AstNode *parse_let(Parser *p) {
-    expect(p, TOK_LET, "expected 'let'");
+    Token let_tok = expect(p, TOK_LET, "expected 'let'");
     bool is_mut = match(p, TOK_MUT);
+
+    // Tuple destructuring: let (x, y): (int, str) = expr;
+    if (check(p, TOK_LPAREN)) {
+        advance_tok(p);
+        char *names[16];
+        int name_count = 0;
+        do {
+            Token nt = expect(p, TOK_IDENT, "expected variable name in destructuring");
+            names[name_count++] = tok_str(nt);
+        } while (match(p, TOK_COMMA));
+        expect(p, TOK_RPAREN, "expected ')' after destructuring names");
+        expect(p, TOK_COLON, "expected ':' after destructuring pattern");
+        AstType *type = parse_type(p);
+        expect(p, TOK_ASSIGN, "expected '=' in let statement");
+        AstNode *init = parse_expr(p);
+        expect(p, TOK_SEMICOLON, "expected ';' after let statement");
+        AstNode *n = ast_new(NODE_LET_STMT, let_tok);
+        n->as.let_stmt.name = NULL;
+        n->as.let_stmt.is_mut = is_mut;
+        n->as.let_stmt.type = type;
+        n->as.let_stmt.init = init;
+        n->as.let_stmt.is_destructure = true;
+        n->as.let_stmt.names = malloc(sizeof(char *) * (size_t)name_count);
+        memcpy(n->as.let_stmt.names, names, sizeof(char *) * (size_t)name_count);
+        n->as.let_stmt.name_count = name_count;
+        return n;
+    }
+
     Token name = expect(p, TOK_IDENT, "expected variable name");
     expect(p, TOK_COLON, "expected ':' after variable name");
     AstType *type = parse_type(p);
@@ -790,6 +818,7 @@ static AstNode *parse_let(Parser *p) {
     n->as.let_stmt.is_mut = is_mut;
     n->as.let_stmt.type = type;
     n->as.let_stmt.init = init;
+    n->as.let_stmt.is_destructure = false;
     return n;
 }
 
@@ -824,6 +853,35 @@ static AstNode *parse_while(Parser *p) {
 
 static AstNode *parse_for(Parser *p) {
     Token for_tok = expect(p, TOK_FOR, "expected 'for'");
+
+    // Tuple destructuring: for (k, v) in arr { }
+    if (check(p, TOK_LPAREN)) {
+        advance_tok(p);
+        char *names[16];
+        int name_count = 0;
+        do {
+            Token nt = expect(p, TOK_IDENT, "expected variable name in destructuring");
+            names[name_count++] = tok_str(nt);
+        } while (match(p, TOK_COMMA));
+        expect(p, TOK_RPAREN, "expected ')' after destructuring names");
+        expect(p, TOK_IN, "expected 'in'");
+        AstNode *iterable = parse_expr(p);
+        AstNode *body = parse_block(p);
+        AstNode *n = ast_new(NODE_FOR_STMT, for_tok);
+        n->as.for_stmt.var_name = NULL;
+        n->as.for_stmt.start = NULL;
+        n->as.for_stmt.end = NULL;
+        n->as.for_stmt.inclusive = false;
+        n->as.for_stmt.is_foreach = true;
+        n->as.for_stmt.iterable = iterable;
+        n->as.for_stmt.body = body;
+        n->as.for_stmt.is_destructure = true;
+        n->as.for_stmt.var_names = malloc(sizeof(char *) * (size_t)name_count);
+        memcpy(n->as.for_stmt.var_names, names, sizeof(char *) * (size_t)name_count);
+        n->as.for_stmt.var_count = name_count;
+        return n;
+    }
+
     Token var = expect(p, TOK_IDENT, "expected loop variable");
     expect(p, TOK_IN, "expected 'in'");
     AstNode *expr = parse_expr(p);
@@ -842,6 +900,7 @@ static AstNode *parse_for(Parser *p) {
         n->as.for_stmt.is_foreach = false;
         n->as.for_stmt.iterable = NULL;
         n->as.for_stmt.body = body;
+        n->as.for_stmt.is_destructure = false;
         return n;
     }
 
@@ -855,6 +914,7 @@ static AstNode *parse_for(Parser *p) {
     n->as.for_stmt.is_foreach = true;
     n->as.for_stmt.iterable = expr;
     n->as.for_stmt.body = body;
+    n->as.for_stmt.is_destructure = false;
     return n;
 }
 

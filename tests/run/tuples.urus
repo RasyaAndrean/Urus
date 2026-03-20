@@ -22,4 +22,14 @@ fn main(): void {
     print(triple.0);
     print(triple.1);
     print(triple.2);
+
+    // Tuple destructuring
+    let (x, y): (int, str) = get_pair();
+    print(x);
+    print(y);
+
+    let (a, b, c): (int, int, int) = (10, 20, 30);
+    print(a);
+    print(b);
+    print(c);
 }

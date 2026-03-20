@@ -146,6 +146,10 @@ struct AstNode {
             bool is_mut;
             AstType *type;
             AstNode *init;
+            // Tuple destructuring: let (x, y) = expr;
+            bool is_destructure;
+            char **names;
+            int name_count;
         } let_stmt;
 
         // NODE_ASSIGN_STMT
@@ -181,6 +185,10 @@ struct AstNode {
             bool inclusive;
             bool is_foreach;
             AstNode *body;
+            // Tuple destructuring: for (k, v) in arr { }
+            bool is_destructure;
+            char **var_names;
+            int var_count;
         } for_stmt;
 
         // NODE_RETURN_STMT

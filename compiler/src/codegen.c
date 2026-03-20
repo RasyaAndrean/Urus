@@ -787,6 +787,36 @@ static void gen_stmt(CodeBuf *buf, AstNode *node) {
     case NODE_LET_STMT:
         // Emit pre-statements for complex initializers
         gen_expr_pre(buf, node->as.let_stmt.init);
+
+        if (node->as.let_stmt.is_destructure) {
+            // Tuple destructuring: let (x, y): (int, str) = expr;
+            AstType *tuple_t = node->as.let_stmt.type;
+            int tmp = buf->tmp_counter++;
+            emit_indent(buf);
+            gen_type(buf, tuple_t);
+            emit(buf, " _urus_dtmp_%d = ", tmp);
+            gen_expr(buf, node->as.let_stmt.init);
+            emit(buf, ";\n");
+            for (int i = 0; i < node->as.let_stmt.name_count; i++) {
+                AstType *ft = tuple_t->element_types[i];
+                emit_indent(buf);
+                if (type_needs_rc(ft)) {
+                    const char *dtor = "NULL";
+                    if (ft->kind == TYPE_STR) dtor = "urus_str_drop";
+                    else if (ft->kind == TYPE_ARRAY) dtor = "urus_array_drop";
+                    else if (ft->kind == TYPE_RESULT) dtor = "urus_result_drop";
+                    else if (ft->kind == TYPE_NAMED) dtor = NULL;
+                    else if (ft->kind == TYPE_TUPLE) dtor = NULL;
+                    if (dtor) emit(buf, "URUS_RAII(%s) ", dtor);
+                    else if (ft->kind == TYPE_NAMED) emit(buf, "URUS_RAII(%s_drop) ", ft->name);
+                    else if (ft->kind == TYPE_TUPLE) emit(buf, "URUS_RAII(%s_drop) ", tuple_type_name(ft));
+                }
+                gen_type(buf, ft);
+                emit(buf, " %s = _urus_dtmp_%d.f%d;\n", node->as.let_stmt.names[i], tmp, i);
+            }
+            break;
+        }
+
         emit_indent(buf);
 
         // Emit RAII auto destruct __attribute((cleanup()))
@@ -918,10 +948,25 @@ static void gen_stmt(CodeBuf *buf, AstNode *node) {
                 default: break;
                 }
             }
-            emit_indent(buf);
-            if (elem) gen_type(buf, elem); else emit(buf, "int64_t");
-            emit(buf, " %s = %s(_urus_iter_%d, _urus_idx_%d);\n",
-                 node->as.for_stmt.var_name, getter, tmp, tmp);
+            if (node->as.for_stmt.is_destructure && elem && elem->kind == TYPE_TUPLE) {
+                // Tuple destructuring: for (k, v) in arr { ... }
+                emit_indent(buf);
+                gen_type(buf, elem);
+                emit(buf, " _urus_dtup_%d; memcpy(&_urus_dtup_%d, urus_array_get_ptr(_urus_iter_%d, _urus_idx_%d), sizeof(",
+                     tmp, tmp, tmp, tmp);
+                gen_type(buf, elem);
+                emit(buf, "));\n");
+                for (int i = 0; i < node->as.for_stmt.var_count; i++) {
+                    emit_indent(buf);
+                    gen_type(buf, elem->element_types[i]);
+                    emit(buf, " %s = _urus_dtup_%d.f%d;\n", node->as.for_stmt.var_names[i], tmp, i);
+                }
+            } else {
+                emit_indent(buf);
+                if (elem) gen_type(buf, elem); else emit(buf, "int64_t");
+                emit(buf, " %s = %s(_urus_iter_%d, _urus_idx_%d);\n",
+                     node->as.for_stmt.var_name, getter, tmp, tmp);
+            }
 
             // Emit body statements
             for (int i = 0; i < node->as.for_stmt.body->as.block.stmt_count; i++) {

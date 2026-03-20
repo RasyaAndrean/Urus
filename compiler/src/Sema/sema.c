@@ -494,6 +494,26 @@ static void check_stmt(SemaCtx *ctx, AstNode *node) {
         AstType *init_type = check_expr(ctx, node->as.let_stmt.init);
         AstType *decl_type = node->as.let_stmt.type;
 
+        if (node->as.let_stmt.is_destructure) {
+            // Tuple destructuring: let (x, y): (int, str) = expr;
+            if (decl_type && decl_type->kind != TYPE_TUPLE) {
+                sema_error(ctx, &node->tok, "destructuring requires a tuple type");
+            } else if (decl_type && decl_type->element_count != node->as.let_stmt.name_count) {
+                sema_error(ctx, &node->tok, "destructuring expects %d variables, got %d",
+                           decl_type->element_count, node->as.let_stmt.name_count);
+            }
+            for (int i = 0; i < node->as.let_stmt.name_count; i++) {
+                if (scope_lookup_local(ctx->current, node->as.let_stmt.names[i])) {
+                    sema_error(ctx, &node->tok, "variable '%s' already declared in this scope",
+                               node->as.let_stmt.names[i]);
+                }
+                SemaSymbol *sym = scope_add(ctx->current, node->as.let_stmt.names[i], node->tok);
+                sym->type = (decl_type && i < decl_type->element_count) ? decl_type->element_types[i] : ast_type_simple(TYPE_VOID);
+                sym->is_mut = node->as.let_stmt.is_mut;
+            }
+            break;
+        }
+
         if (init_type && decl_type && (!ast_types_equal(init_type, decl_type) && !ast_types_compatible(init_type, decl_type))) {
             // Allow Result type coercion (Ok/Err assign to Result<T,E>)
             if (!(decl_type->kind == TYPE_RESULT &&
@@ -575,9 +595,26 @@ static void check_stmt(SemaCtx *ctx, AstNode *node) {
 
             SemaScope *body_scope = scope_new(ctx->current);
             ctx->current = body_scope;
-            SemaSymbol *loop_var = scope_add(body_scope, node->as.for_stmt.var_name, node->tok);
-            loop_var->type = elem_type;
-            loop_var->is_mut = false;
+
+            if (node->as.for_stmt.is_destructure) {
+                // for (k, v) in arr { }
+                if (elem_type->kind != TYPE_TUPLE) {
+                    sema_error(ctx, &node->tok, "for destructuring requires array of tuples");
+                } else if (elem_type->element_count != node->as.for_stmt.var_count) {
+                    sema_error(ctx, &node->tok, "for destructuring expects %d variables, got %d",
+                               elem_type->element_count, node->as.for_stmt.var_count);
+                }
+                for (int i = 0; i < node->as.for_stmt.var_count; i++) {
+                    SemaSymbol *sym = scope_add(body_scope, node->as.for_stmt.var_names[i], node->tok);
+                    sym->type = (elem_type->kind == TYPE_TUPLE && i < elem_type->element_count)
+                                ? elem_type->element_types[i] : ast_type_simple(TYPE_VOID);
+                    sym->is_mut = false;
+                }
+            } else {
+                SemaSymbol *loop_var = scope_add(body_scope, node->as.for_stmt.var_name, node->tok);
+                loop_var->type = elem_type;
+                loop_var->is_mut = false;
+            }
 
             ctx->loop_depth++;
             AstNode *body = node->as.for_stmt.body;
