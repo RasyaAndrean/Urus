@@ -13,4 +13,15 @@ fn main(): void {
     } else {
         print("other");
     }
+
+    // If-expression (ternary)
+    let label: str = if x > 5 { "big" } else { "small" };
+    print(label);
+
+    // If-expression in function argument
+    print(if x == 10 { "yes" } else { "no" });
+
+    // If-expression with arithmetic
+    let val: int = if x > 0 { x * 2 } else { 0 };
+    print(val);
 }
